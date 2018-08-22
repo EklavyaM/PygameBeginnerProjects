@@ -7,12 +7,15 @@ from time import sleep
 
 class AssholeSpawner:
 
-    def __init__(self):
+    def __init__(self, l_player):
         self.assholes = []
         self.thread_spawner = Thread(target=self.__spawn)
         self.temp_pos_x = 0
         self.temp_vel = 0
         self.temp_size = 0
+
+        self.player = l_player
+
         self.thread_spawner.start()
 
     def __spawn(self):
@@ -20,13 +23,14 @@ class AssholeSpawner:
             self.temp_pos_x = randint(0, screen_dimensions[0])
             self.temp_vel = randint(1, 5)
             self.temp_size_x = self.temp_size_y = randint(8, 20)
-            self.assholes.append(AssholeSpawner.Asshole(self.temp_pos_x, -self.temp_size, self.temp_vel,
+            self.assholes.append(AssholeSpawner.Asshole(self.temp_pos_x, -self.temp_size_y, self.temp_vel,
                                                         self.temp_size_x, self.temp_size_y))
-            sleep(0.1)
+            sleep(1)
 
     def move(self):
         for asshole in self.assholes:
             asshole.move()
+            asshole.check_player_collision(self.player)
             if asshole.pos_y > screen_dimensions[1]:
                 self.assholes.remove(asshole)
 
@@ -43,14 +47,17 @@ class AssholeSpawner:
             self.size_x = l_size_x
             self.size_y = l_size_y
             self.color = pygame.Color("red")
-            self.hit_box = (self.pos_x, self.pos_y, self.size_x, self.size_y)
+            self.hit_box = pygame.Rect(self.pos_x, self.pos_y, self.size_x, self.size_y)
 
         def move(self):
-            self.pos_y += self.velocity
+            self.pos_y = self.hit_box.top = self.pos_y + self.velocity
 
         def draw(self, scr):
-            self.hit_box = (self.pos_x, self.pos_y, self.size_x, self.size_y)
             pygame.draw.rect(scr, self.color, self.hit_box)
+
+        def check_player_collision(self, l_player):
+            if self.hit_box.colliderect(l_player.hit_box):
+                print("collided")
 
 
 class Player:
@@ -68,7 +75,7 @@ class Player:
         self.pos_y = l_pos_y
         self.vel_x = 0
         self.vel_y = 0
-        self.hit_box = (self.pos_x, self.pos_y, Player.SIZE_X, Player.SIZE_Y)
+        self.hit_box = pygame.Rect(self.pos_x, self.pos_y, Player.SIZE_X, Player.SIZE_Y)
         self.color = pygame.Color("white")
 
     def move(self):
@@ -119,15 +126,16 @@ class Player:
         elif l_temp_pos_y < 0:
             l_temp_pos_y = 0
 
-        self.pos_x = l_temp_pos_x
-        self.pos_y = l_temp_pos_y
+        self.pos_x = self.hit_box.left = l_temp_pos_x
+        self.pos_y = self.hit_box.top = l_temp_pos_y
 
     def draw(self, scr):
-        self.hit_box = (self.pos_x, self.pos_y, Player.SIZE_X, Player.SIZE_Y)
         pygame.draw.rect(scr, self.color, self.hit_box)
 
 
 def main():
+
+    global game_running, player
 
     pygame.init()
 
@@ -135,9 +143,7 @@ def main():
     pygame.display.set_caption(screen_title)
 
     player = Player(screen_dimensions[0]//2, screen_dimensions[1]//2)
-    asshole_spawner = AssholeSpawner()
-
-    global game_running
+    asshole_spawner = AssholeSpawner(player)
 
     while game_running:
         for event in pygame.event.get():
@@ -170,6 +176,7 @@ if __name__ == "__main__":
     screen_dimensions = (800, 600)
     screen_title = "Dodger"
     game_running = True
+    player = None
 
     main()
 
