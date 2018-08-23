@@ -14,7 +14,7 @@ class AssholeSpawner:
 
         self.__assholes = []
         self.__thread_spawner = Thread(target=self.__spawn)
-        self.__sleep_time = 0.07
+        self.__sleep_time = 0.8
         self.__temp_pos_x = 0
         self.__temp_vel = 0
         self.__temp_size_x = 0
@@ -36,11 +36,15 @@ class AssholeSpawner:
 
         while g_game_running:
             self.__temp_pos_x = randint(0, g_game_area_dimensions[0])
-            self.__temp_vel = randint(100, 500)
+            self.__temp_vel = randint(10, 700)
             self.__temp_size_x = self.__temp_size_y = randint(8, 20)
             self.__assholes.append(AssholeSpawner.Asshole(self.__temp_pos_x, -self.__temp_size_y, self.__temp_vel,
                                                           self.__temp_size_x, self.__temp_size_y))
             sleep(self.__sleep_time)
+
+    def increase_difficulty(self):
+        if self.__sleep_time >= 0.12:
+            self.__sleep_time -= 0.07
 
     def move(self):
 
@@ -57,11 +61,11 @@ class AssholeSpawner:
 
             # ==================== Check if Asshole Collided with Player ==========================================
 
-            # if asshole.check_player_collision(self.player):
-            #     global g_game_running
-            #     g_game_running = False
-            #
-            #     print("Score: " + get_score())
+            if asshole.check_player_collision(self.__player):
+                global g_game_running
+                g_game_running = False
+
+                print("Score: " + get_score())
 
     def draw(self, scr):
 
@@ -267,7 +271,7 @@ def init():
     g_screen = pygame.display.set_mode(g_screen_dimensions)
     pygame.display.set_caption(g_screen_title)
 
-    g_player = Player(g_game_area_dimensions[0] // 2, g_game_area_dimensions[1] // 2)
+    g_player = Player(g_game_area_dimensions[0] // 2, g_game_area_dimensions[1] - Player.SIZE_Y)
     g_asshole_spawner = AssholeSpawner(g_player)
 
 
@@ -275,7 +279,27 @@ def get_score():
 
     # ====================  Returns a string with rounded score =====================================================
 
-    return str(math.ceil(g_score))
+    return str(math.trunc(g_score))
+
+
+def check_score_and_increase_difficulty():
+
+    # ====================  Checks if the Score lies between a range and increases the difficulty ===================
+    # ====================  along with the Score Increment Value when it crosses the upper bound ====================
+    # ====================  then updates the upper bound to 1.5 times the lower bound ===============================
+    # ====================  and the lower bound to the old value of upper bound =====================================
+    # ====================  Thereby creating a dynamic range of levels of difficulty which is =======================
+
+    # ====================  [g_check_score_min_bound, 1.5 * g_check_score_min_bound] ================================
+
+    global g_score_frame_increment, g_check_score_min_bound, g_asshole_spawner
+
+    if g_check_score_min_bound < g_score < g_check_score_multiplier * g_check_score_min_bound:
+        g_score_frame_increment += 0.01
+
+    elif g_score > g_check_score_multiplier * g_check_score_min_bound:
+        g_asshole_spawner.increase_difficulty()
+        g_check_score_min_bound *= g_check_score_multiplier
 
 
 def update_score(l_value):
@@ -302,6 +326,7 @@ def main():
         logic()
         render()
         update_score(g_score_frame_increment)
+        check_score_and_increase_difficulty()
         pygame.time.delay(math.trunc(g_time_per_frame_in_milli_seconds))
 
     pygame.quit()
@@ -334,6 +359,11 @@ if __name__ == "__main__":
     g_score_text = None
 
     g_game_area_dimensions = (g_screen_dimensions[0], g_screen_dimensions[1] - g_font_size)
+
+    # ====================  A Min Score for Dynamic Difficulty Increase ============================================
+
+    g_check_score_min_bound = 2
+    g_check_score_multiplier = 1.5
 
     main()
 
