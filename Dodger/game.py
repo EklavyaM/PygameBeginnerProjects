@@ -7,6 +7,15 @@ from time import sleep
 
 class AssholeSpawner:
 
+    # ==================== The sleep time of the Spawning thread is decreased by increasing ==========================
+    # ==================== the Difficulty value thereby making it spawn assholes faster ==============================
+
+    # ==================== The THRESHOLD_DIFFICULTY value is the minimum sleep time required =====================
+    # ==================== by the Spawning thread. Any less than 0.07 makes the game far too difficult =============
+
+    DIFFICULTY_VALUE = 0.07
+    THRESHOLD_DIFFICULTY = 0.07
+
     def __init__(self, l_player):
 
         # ==================== AssholeSpawner Constructor ==========================================================
@@ -43,8 +52,11 @@ class AssholeSpawner:
             sleep(self.__sleep_time)
 
     def increase_difficulty(self):
-        if self.__sleep_time >= 0.12:
-            self.__sleep_time -= 0.07
+
+        # ==================== Try not to change this ======================================================
+
+        if self.__sleep_time - AssholeSpawner.DIFFICULTY_VALUE >= AssholeSpawner.THRESHOLD_DIFFICULTY:
+            self.__sleep_time -= AssholeSpawner.DIFFICULTY_VALUE
 
     def move(self):
 
