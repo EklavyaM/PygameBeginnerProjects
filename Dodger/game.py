@@ -10,10 +10,10 @@ def render():
 
     global g_screen_dimensions, g_screen, g_asshole_spawner, g_font, g_font_size, g_score, g_score_text
 
-    g_screen.fill(pygame.Color("black"))
+    g_screen.fill(pygame.Color("white"))
 
-    g_score_text = g_font.render("Score: " + get_score(), True, (255, 255, 255))
-    g_lives_text = g_font.render("Lives: " + str(g_player.get_lives()), True, (255, 255, 255))
+    g_score_text = g_font.render("Score: " + get_score(), True, (0, 0, 0))
+    g_lives_text = g_font.render("Lives: " + str(g_player.get_lives()), True, (0, 0, 0))
 
     g_screen.blit(g_score_text,
                   (g_screen_dimensions[0]//2 - g_score_text.get_rect().width//2, g_screen_dimensions[1] - g_font_size))
@@ -138,8 +138,8 @@ if __name__ == "__main__":
     g_score_frame_increment = 1
 
     g_font = None
-    g_font_size = 32
-    g_font_style = "comicsansms"
+    g_font_size = 24
+    g_font_style = "cousine"
     g_score_text = None
     g_font_screen_offset = 10
 

@@ -62,7 +62,7 @@ class AssholeSpawner:
         while self.__player.get_is_alive():
 
             self.__temp_vel = randint(10, 700)
-            self.__temp_size_x = self.__temp_size_y = randint(8, 20)
+            self.__temp_size_x = self.__temp_size_y = randint(10, 20)
             self.__temp_pos_x = randint(0, self.__screen_width - self.__temp_size_x)
             self.__temp_type_index = randint(0, len(AssholeSpawner.Asshole.TYPES) - 1)
 
@@ -144,13 +144,21 @@ class AssholeSpawner:
             self.__velocity = l_vel
             self.__size_x = l_size_x
             self.__size_y = l_size_y
-            self.__color = pygame.Color("red")
+
+            self.__outer_color = pygame.Color("black")
+            self.__stroke_width = 1
+
+            self.__inner_color = pygame.Color("red")
 
             self.__type = AssholeSpawner.Asshole.TYPES[l_type_index]
 
             self.__is_destroyed = False
             self.__has_collided = False
+
             self.__hit_box = pygame.Rect(self.__pos_x, self.__pos_y, self.__size_x, self.__size_y)
+            self.__inner_box = pygame.Rect(self.__pos_x + self.__stroke_width, self.__pos_y + self.__stroke_width,
+                                           self.__size_x - 2 * self.__stroke_width,
+                                           self.__size_y - 2 * self.__stroke_width)
 
         def move(self, dt):
 
@@ -160,23 +168,38 @@ class AssholeSpawner:
             if not self.__has_collided:
 
                 if self.__type == AssholeSpawner.Asshole.DIR_DOWN:
-                    self.__pos_y = self.__hit_box.top = self.__pos_y + self.__velocity * dt
+                    self.update_pos(self.__pos_y + self.__velocity * dt)
 
                 elif self.__type == AssholeSpawner.Asshole.DIR_UP:
-                    self.__pos_y = self.__hit_box.top = self.__pos_y - self.__velocity * dt
+                    self.update_pos(self.__pos_y - self.__velocity * dt)
 
             else:
-                self.__color.r -= 10
 
-                if self.__color.r <= 10:
+                # ==================== animating outer color from black to white ===================================
+
+                self.__outer_color.r += 10
+                self.__outer_color.g += 10
+                self.__outer_color.b += 10
+
+                # ==================== animating inner color from red to white =====================================
+
+                self.__inner_color.g += 10
+                self.__inner_color.b += 10
+
+                if self.__inner_color.g >= 245 or self.__inner_color.b >= 245:
                     self.__is_destroyed = True
                     pass
+
+        def update_pos(self, l_pos_y):
+            self.__pos_y = self.__hit_box.top = l_pos_y
+            self.__inner_box.top = self.__pos_y + self.__stroke_width
 
         def draw(self, scr):
 
             # ==================== Drawing the Asshole ===========================================================
 
-            pygame.draw.rect(scr, self.__color, self.__hit_box)
+            pygame.draw.rect(scr, self.__outer_color, self.__hit_box)
+            pygame.draw.rect(scr, self.__inner_color, self.__inner_box)
 
         def check_player_collision(self, l_player):
 

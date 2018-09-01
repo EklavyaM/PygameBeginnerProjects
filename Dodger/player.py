@@ -41,8 +41,14 @@ class Player:
         self.__vel_y = 0
         self.__acc = Player.REG_ACC
 
+        self.__inner_color = pygame.Color(Player.REG_COLOR)
+        self.__outer_color = pygame.Color("black")
+        self.__stroke_width = 2
+
         self.__hit_box = pygame.Rect(self.__pos_x, self.__pos_y, Player.SIZE_X, Player.SIZE_Y)
-        self.__color = pygame.Color(Player.REG_COLOR)
+        self.__inner_box = pygame.Rect(self.__pos_x + self.__stroke_width, self.__pos_y + self.__stroke_width,
+                                       Player.SIZE_X - 2 * self.__stroke_width, Player.SIZE_Y - 2 * self.__stroke_width)
+
         self.__lives = 3
         self.__current_dir = None
 
@@ -115,16 +121,22 @@ class Player:
         elif l_temp_pos_y < -Player.SIZE_Y:
             l_temp_pos_y = self.screen_height - Player.SIZE_Y
 
+        self.update_pos(l_temp_pos_x, l_temp_pos_y)
+
+    def update_pos(self, l_pos_x, l_pos_y):
+
         # ==================== Updating Positions of both the Player and its Hit Box Rect ===========================
 
-        self.__pos_x = self.__hit_box.left = l_temp_pos_x
-        self.__pos_y = self.__hit_box.top = l_temp_pos_y
+        self.__pos_x = self.__hit_box.left = l_pos_x
+        self.__pos_y = self.__hit_box.top = l_pos_y
+        self.__inner_box.left = self.__pos_x + self.__stroke_width
+        self.__inner_box.top = self.__pos_y + self.__stroke_width
 
     def draw(self, scr):
 
         # ==================== Drawing the Player =================================================================
-
-        pygame.draw.rect(scr, self.__color, self.__hit_box)
+        pygame.draw.rect(scr, self.__outer_color, self.__hit_box)
+        pygame.draw.rect(scr, self.__inner_color, self.__inner_box)
 
     def hit(self):
 
@@ -142,7 +154,7 @@ class Player:
         # ==================== When Player is Stunned start a stun timer ============================================
 
         self.__acc = Player.STUN_ACC
-        self.__color = pygame.Color(Player.STUN_COLOR)
+        self.__inner_color = pygame.Color(Player.STUN_COLOR)
 
         if not self.stun_timer:
             self.stun_timer = Timer(Player.STUN_TIME, self.un_stun)
@@ -160,7 +172,7 @@ class Player:
         # ==================== Called when stun timer ends ===========================================================
 
         self.__acc = Player.REG_ACC
-        self.__color = pygame.Color(Player.REG_COLOR)
+        self.__inner_color = pygame.Color(Player.REG_COLOR)
 
     def kill(self):
 
