@@ -105,15 +105,15 @@ class Player:
         l_temp_pos_x = self.__pos_x + self.__vel_x * dt
         l_temp_pos_y = self.__pos_y + self.__vel_y * dt
 
-        if l_temp_pos_x > self.screen_width - Player.SIZE_X:
-            l_temp_pos_x = self.screen_width - Player.SIZE_X
-        elif l_temp_pos_x < 0:
+        if l_temp_pos_x > self.screen_width:
             l_temp_pos_x = 0
+        elif l_temp_pos_x < -Player.SIZE_X:
+            l_temp_pos_x = self.screen_width - Player.SIZE_X
 
-        if l_temp_pos_y > self.screen_height - Player.SIZE_Y:
-            l_temp_pos_y = self.screen_height - Player.SIZE_Y
-        elif l_temp_pos_y < 0:
+        if l_temp_pos_y > self.screen_height:
             l_temp_pos_y = 0
+        elif l_temp_pos_y < -Player.SIZE_Y:
+            l_temp_pos_y = self.screen_height - Player.SIZE_Y
 
         # ==================== Updating Positions of both the Player and its Hit Box Rect ===========================
 
