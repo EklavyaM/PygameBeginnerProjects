@@ -14,7 +14,7 @@ class Player:
     REG_COLOR = "white"
 
     STUN_ACC = 50
-    STUN_COLOR = "blue"
+    STUN_COLOR = "black"
     STUN_TIME = 3.5
 
     MAX_VELOCITY = 500
@@ -33,8 +33,8 @@ class Player:
         # ==================== Player Constructor =================================================================
 
         self.__is_alive = True
-        self.screen_width = l_screen_width
-        self.screen_height = l_screen_height
+        self.__screen_width = l_screen_width
+        self.__screen_height = l_screen_height
         self.__pos_x = l_pos_x
         self.__pos_y = l_pos_y
         self.__vel_x = 0
@@ -111,15 +111,15 @@ class Player:
         l_temp_pos_x = self.__pos_x + self.__vel_x * dt
         l_temp_pos_y = self.__pos_y + self.__vel_y * dt
 
-        if l_temp_pos_x > self.screen_width:
+        if l_temp_pos_x > self.__screen_width:
             l_temp_pos_x = 0
         elif l_temp_pos_x < -Player.SIZE_X:
-            l_temp_pos_x = self.screen_width - Player.SIZE_X
+            l_temp_pos_x = self.__screen_width - Player.SIZE_X
 
-        if l_temp_pos_y > self.screen_height:
+        if l_temp_pos_y > self.__screen_height:
             l_temp_pos_y = 0
         elif l_temp_pos_y < -Player.SIZE_Y:
-            l_temp_pos_y = self.screen_height - Player.SIZE_Y
+            l_temp_pos_y = self.__screen_height - Player.SIZE_Y
 
         self.update_pos(l_temp_pos_x, l_temp_pos_y)
 

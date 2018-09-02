@@ -15,6 +15,8 @@ class AssholeSpawner:
     DIFFICULTY_VALUE = 0.04
     THRESHOLD_DIFFICULTY = 0.04
 
+    INITIAL_WAIT = 3
+
     def __init__(self, l_player, l_screen_width, l_screen_height, l_bottom_offset):
 
         # ==================== AssholeSpawner Constructor ==========================================================
@@ -25,7 +27,7 @@ class AssholeSpawner:
         self.__screen_height = l_screen_height
         self.__bottom_offset = l_bottom_offset
 
-        self.__thread_spawner = Timer(3, self.__spawn)
+        self.__thread_spawner = Timer(AssholeSpawner.INITIAL_WAIT, self.__spawn)
         self.__sleep_time = 0.8
 
         self.__temp_pos_x = 0
@@ -62,7 +64,7 @@ class AssholeSpawner:
         while self.__player.get_is_alive():
 
             self.__temp_vel = randint(10, 700)
-            self.__temp_size_x = self.__temp_size_y = randint(10, 20)
+            self.__temp_size_x = self.__temp_size_y = randint(8, 20)
             self.__temp_pos_x = randint(0, self.__screen_width - self.__temp_size_x)
             self.__temp_type_index = randint(0, len(AssholeSpawner.Asshole.TYPES) - 1)
 
@@ -148,7 +150,7 @@ class AssholeSpawner:
             self.__outer_color = pygame.Color("black")
             self.__stroke_width = 1
 
-            self.__inner_color = pygame.Color("red")
+            self.__inner_color = pygame.Color("black")
 
             self.__type = AssholeSpawner.Asshole.TYPES[l_type_index]
 
@@ -174,21 +176,33 @@ class AssholeSpawner:
                     self.update_pos(self.__pos_y - self.__velocity * dt)
 
             else:
+                self.play_death_animation()
 
-                # ==================== animating outer color from black to white ===================================
+        def kill(self):
+            self.__is_destroyed = True
 
-                self.__outer_color.r += 10
-                self.__outer_color.g += 10
-                self.__outer_color.b += 10
+        def play_death_animation(self):
 
-                # ==================== animating inner color from red to white =====================================
+            # ==================== fade to white ===================================
 
+            if self.__inner_color.r < 245:
+                self.__inner_color.r += 10
+            if self.__inner_color.g < 245:
                 self.__inner_color.g += 10
+            if self.__inner_color.b < 245:
                 self.__inner_color.b += 10
 
-                if self.__inner_color.g >= 245 or self.__inner_color.b >= 245:
-                    self.__is_destroyed = True
-                    pass
+            if self.__outer_color.r < 245:
+                self.__outer_color.r += 10
+            if self.__outer_color.g < 245:
+                self.__outer_color.g += 10
+            if self.__outer_color.b < 245:
+                self.__outer_color.b += 10
+
+            # ==================== death =====================================
+
+            if self.__inner_color.r >= 245 and self.__inner_color.g >= 245 and self.__inner_color.b >= 245:
+                self.kill()
 
         def update_pos(self, l_pos_y):
             self.__pos_y = self.__hit_box.top = l_pos_y
@@ -230,3 +244,4 @@ class AssholeSpawner:
 
         def get_size_y(self):
             return self.__size_y
+
