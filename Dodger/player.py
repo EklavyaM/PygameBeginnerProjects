@@ -19,7 +19,7 @@ class Player:
 
     MAX_VELOCITY = 500
     MIN_VELOCITY = 0.5
-    FRICTION = 0.3
+    FRICTION = 0.4
 
     DIR_UP = 0
     DIR_DOWN = 1
@@ -31,6 +31,12 @@ class Player:
     def __init__(self, l_pos_x, l_pos_y, l_screen_width, l_screen_height):
 
         # ==================== Player Constructor =================================================================
+
+        Player.SIZE_X = l_screen_width/100
+        Player.SIZE_Y = Player.SIZE_X
+        Player.REG_ACC = l_screen_width/8
+        Player.STUN_ACC = Player.REG_ACC/4
+        Player.MAX_VELOCITY = l_screen_width/3.8
 
         self.__is_alive = True
         self.__screen_width = l_screen_width
@@ -100,11 +106,14 @@ class Player:
         # ==================== Stopping all motion when velocity is less than a certain value ========================
         # ==================== which is Player.MIN_VELOCITY in this case =============================================
 
-        if math.fabs(self.__vel_x) > Player.MIN_VELOCITY or math.fabs(self.__vel_y) > Player.MIN_VELOCITY:
+        if math.fabs(self.__vel_x) > Player.MIN_VELOCITY:
             self.__vel_x += -self.__vel_x * Player.FRICTION
+        else:
+            self.__vel_x = 0
+        if math.fabs(self.__vel_y) > Player.MIN_VELOCITY:
             self.__vel_y += -self.__vel_y * Player.FRICTION
         else:
-            self.__vel_x, self.__vel_y = 0, 0
+            self.__vel_y = 0
 
         # ==================== Checking for Boundary =================================================================
 

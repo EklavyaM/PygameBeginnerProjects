@@ -1,4 +1,5 @@
 import pygame
+import math
 from time import sleep
 from random import randint
 from threading import Timer
@@ -63,8 +64,8 @@ class AssholeSpawner:
 
         while self.__player.get_is_alive():
 
-            self.__temp_vel = randint(10, 700)
-            self.__temp_size_x = self.__temp_size_y = randint(8, 20)
+            self.__temp_vel = randint(self.__screen_width // 160, self.__screen_width//2.5)
+            self.__temp_size_x = self.__temp_size_y = randint(self.__screen_width//200, self.__screen_width/80)
             self.__temp_pos_x = randint(0, self.__screen_width - self.__temp_size_x)
             self.__temp_type_index = randint(0, len(AssholeSpawner.Asshole.TYPES) - 1)
 
@@ -162,6 +163,9 @@ class AssholeSpawner:
                                            self.__size_x - 2 * self.__stroke_width,
                                            self.__size_y - 2 * self.__stroke_width)
 
+            self.__temp_color_increment = 10
+            self.__temp_color_boundary = 245
+
         def move(self, dt):
 
             # ==================== Updating Asshole's Position  ==================================================
@@ -176,32 +180,37 @@ class AssholeSpawner:
                     self.update_pos(self.__pos_y - self.__velocity * dt)
 
             else:
-                self.play_death_animation()
+                self.play_death_animation(dt)
 
         def kill(self):
             self.__is_destroyed = True
 
-        def play_death_animation(self):
+        def play_death_animation(self, dt):
 
-            # ==================== fade to white ===================================
+            # ==================== fade to white ===============================================================
 
-            if self.__inner_color.r < 245:
-                self.__inner_color.r += 10
-            if self.__inner_color.g < 245:
-                self.__inner_color.g += 10
-            if self.__inner_color.b < 245:
-                self.__inner_color.b += 10
+            self.__temp_color_increment = math.trunc(800 * dt)
+            self.__temp_color_boundary = 256 - self.__temp_color_increment
 
-            if self.__outer_color.r < 245:
-                self.__outer_color.r += 10
-            if self.__outer_color.g < 245:
-                self.__outer_color.g += 10
-            if self.__outer_color.b < 245:
-                self.__outer_color.b += 10
+            if self.__inner_color.r < self.__temp_color_boundary:
+                self.__inner_color.r += self.__temp_color_increment
+            if self.__inner_color.g < self.__temp_color_boundary:
+                self.__inner_color.g += self.__temp_color_increment
+            if self.__inner_color.b < self.__temp_color_boundary:
+                self.__inner_color.b += self.__temp_color_increment
+
+            if self.__outer_color.r < self.__temp_color_boundary:
+                self.__outer_color.r += self.__temp_color_increment
+            if self.__outer_color.g < self.__temp_color_boundary:
+                self.__outer_color.g += self.__temp_color_increment
+            if self.__outer_color.b < self.__temp_color_boundary:
+                self.__outer_color.b += self.__temp_color_increment
 
             # ==================== death =====================================
 
-            if self.__inner_color.r >= 245 and self.__inner_color.g >= 245 and self.__inner_color.b >= 245:
+            if self.__inner_color.r >= self.__temp_color_boundary \
+                    and self.__inner_color.g >= self.__temp_color_boundary \
+                    and self.__inner_color.b >= self.__temp_color_boundary:
                 self.kill()
 
         def update_pos(self, l_pos_y):

@@ -1,5 +1,3 @@
-
-
 class PowerupSpawner:
 
     SPAWN_TIME = 3
@@ -20,4 +18,3 @@ class PowerupSpawner:
         self.__bottom_offset = l_bottom_offset
 
         self.__player = l_player
-        pass

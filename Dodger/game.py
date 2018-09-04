@@ -20,9 +20,9 @@ class Game:
         self.__score = 0
         self.__score_frame_increment = 1
 
-        self.__font_size = 24
+        self.__font_size = l_screen_height//37
         self.__font_style = "cousine"
-        self.__font_screen_offset = 10
+        self.__font_screen_offset = l_screen_width//160
 
         self.__score_text = None
         self.__lives_text = None
