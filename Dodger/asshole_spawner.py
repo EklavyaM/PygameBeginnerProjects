@@ -13,8 +13,8 @@ class AssholeSpawner:
     # ==================== The THRESHOLD_DIFFICULTY value is the minimum sleep time required =====================
     # ==================== by the Spawning thread. Any less than 0.07 makes the game far too difficult =============
 
-    DIFFICULTY_VALUE = 0.04
-    THRESHOLD_DIFFICULTY = 0.04
+    DIFFICULTY_VALUE = 0.036
+    THRESHOLD_DIFFICULTY = 0.07
 
     INITIAL_WAIT = 3
 
@@ -28,7 +28,7 @@ class AssholeSpawner:
         self.__screen_height = l_screen_height
         self.__bottom_offset = l_bottom_offset
 
-        self.__thread_spawner = Timer(AssholeSpawner.INITIAL_WAIT, self.__spawn)
+        self.__thread_spawner =  Timer(AssholeSpawner.INITIAL_WAIT, self.__spawn)
         self.__sleep_time = 0.8
 
         self.__temp_pos_x = 0
@@ -233,14 +233,14 @@ class AssholeSpawner:
 
         # ==================== Getters and setters ===============================================================
 
-        def set_has_collided(self, has_collided):
-            self.__has_collided = has_collided
+        def set_has_collided(self, l_has_collided):
+            self.__has_collided = l_has_collided
 
         def get_has_collided(self):
             return self.__has_collided
 
-        def set_is_destroyed(self, is_destroyed):
-            self.__is_destroyed = is_destroyed
+        def set_is_destroyed(self, l_is_destroyed):
+            self.__is_destroyed = l_is_destroyed
 
         def get_is_destroyed(self):
             return self.__is_destroyed

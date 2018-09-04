@@ -28,6 +28,8 @@ class Player:
 
     ERR_CODE_DEATH = 0
 
+    MAX_LIVES = 5
+
     def __init__(self, l_pos_x, l_pos_y, l_screen_width, l_screen_height):
 
         # ==================== Player Constructor =================================================================
@@ -36,7 +38,7 @@ class Player:
         Player.SIZE_Y = Player.SIZE_X
         Player.REG_ACC = l_screen_width/8
         Player.STUN_ACC = Player.REG_ACC/4
-        Player.MAX_VELOCITY = l_screen_width/3.8
+        Player.MAX_VELOCITY = l_screen_width/3.2
 
         self.__is_alive = True
         self.__screen_width = l_screen_width
@@ -146,6 +148,10 @@ class Player:
         # ==================== Drawing the Player =================================================================
         pygame.draw.rect(scr, self.__outer_color, self.__hit_box)
         pygame.draw.rect(scr, self.__inner_color, self.__inner_box)
+
+    def life_up(self):
+        if self.__lives < Player.MAX_LIVES:
+            self.__lives += 1
 
     def hit(self):
 
