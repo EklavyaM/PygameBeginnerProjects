@@ -1,6 +1,6 @@
 import pygame
 import math
-from asshole_spawner import AssholeSpawner
+from spawner import EnemySpawn
 from player import Player
 
 
@@ -27,6 +27,8 @@ class Game:
         self.__score_text = None
         self.__lives_text = None
 
+        self.__soundtrack = "421_Disco_Bach_Loop.mp3"
+
         # ====================  A Min Score for Dynamic Difficulty Increase ============================================
 
         self.__check_score_min_bound = 2
@@ -42,8 +44,11 @@ class Game:
         self.__player = Player(self.__screen_width // 2, self.__screen_height // 2,
                                self.__screen_width, self.__screen_height)
 
-        self.__asshole_spawner = AssholeSpawner(self.__player, self.__screen_width, self.__screen_height,
-                                                self.__font_screen_offset)
+        self.__asshole_spawner = EnemySpawn(self.__player, self.__screen_width, self.__screen_height,
+                                            self.__font_screen_offset)
+
+        pygame.mixer.music.load(self.__soundtrack)
+        pygame.mixer.music.play(-1)
 
     def run(self):
 

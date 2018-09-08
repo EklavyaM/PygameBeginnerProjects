@@ -7,18 +7,13 @@ class Player:
 
     # ==================== Player Class Variables =================================================================
 
-    SIZE_X = 16
-    SIZE_Y = 16
-
-    REG_ACC = 200
     REG_COLOR = "white"
-
-    STUN_ACC = 50
     STUN_COLOR = "black"
+
     STUN_TIME = 3.5
 
-    MAX_VELOCITY = 500
     MIN_VELOCITY = 0.5
+
     FRICTION = 0.4
 
     DIR_UP = 0
@@ -34,11 +29,11 @@ class Player:
 
         # ==================== Player Constructor =================================================================
 
-        Player.SIZE_X = l_screen_width/100
-        Player.SIZE_Y = Player.SIZE_X
-        Player.REG_ACC = l_screen_width/8
-        Player.STUN_ACC = Player.REG_ACC/4
-        Player.MAX_VELOCITY = l_screen_width/3.2
+        self.__size_x = l_screen_width/100
+        self.__size_y = self.__size_x
+        self.__reg_acc = l_screen_width/6
+        self.__stun_acc = self.__reg_acc/4
+        self.__max_velocity = l_screen_width/3.2
 
         self.__is_alive = True
         self.__screen_width = l_screen_width
@@ -47,15 +42,15 @@ class Player:
         self.__pos_y = l_pos_y
         self.__vel_x = 0
         self.__vel_y = 0
-        self.__acc = Player.REG_ACC
+        self.__acc = self.__reg_acc
 
         self.__inner_color = pygame.Color(Player.REG_COLOR)
         self.__outer_color = pygame.Color("black")
         self.__stroke_width = 2
 
-        self.__hit_box = pygame.Rect(self.__pos_x, self.__pos_y, Player.SIZE_X, Player.SIZE_Y)
+        self.__hit_box = pygame.Rect(self.__pos_x, self.__pos_y, self.__size_x, self.__size_y)
         self.__inner_box = pygame.Rect(self.__pos_x + self.__stroke_width, self.__pos_y + self.__stroke_width,
-                                       Player.SIZE_X - 2 * self.__stroke_width, Player.SIZE_Y - 2 * self.__stroke_width)
+                                       self.__size_x - 2 * self.__stroke_width, self.__size_y - 2 * self.__stroke_width)
 
         self.__lives = 3
         self.__current_dir = None
@@ -94,15 +89,15 @@ class Player:
         updated_vel_x = self.__vel_x + self.__dx * self.__acc
         updated_vel_y = self.__vel_y + self.__dy * self.__acc
 
-        if math.fabs(updated_vel_x) < Player.MAX_VELOCITY:
+        if math.fabs(updated_vel_x) < self.__max_velocity:
             self.__vel_x = updated_vel_x
         else:
-            self.__vel_x = math.copysign(Player.MAX_VELOCITY, updated_vel_x)
+            self.__vel_x = math.copysign(self.__max_velocity, updated_vel_x)
 
-        if math.fabs(updated_vel_y) < Player.MAX_VELOCITY:
+        if math.fabs(updated_vel_y) < self.__max_velocity:
             self.__vel_y = updated_vel_y
         else:
-            self.__vel_y = math.copysign(Player.MAX_VELOCITY, updated_vel_y)
+            self.__vel_y = math.copysign(self.__max_velocity, updated_vel_y)
 
         # ==================== Applying Friction and =================================================================
         # ==================== Stopping all motion when velocity is less than a certain value ========================
@@ -124,13 +119,13 @@ class Player:
 
         if l_temp_pos_x > self.__screen_width:
             l_temp_pos_x = 0
-        elif l_temp_pos_x < -Player.SIZE_X:
-            l_temp_pos_x = self.__screen_width - Player.SIZE_X
+        elif l_temp_pos_x < -self.__size_x:
+            l_temp_pos_x = self.__screen_width - self.__size_x
 
         if l_temp_pos_y > self.__screen_height:
             l_temp_pos_y = 0
-        elif l_temp_pos_y < -Player.SIZE_Y:
-            l_temp_pos_y = self.__screen_height - Player.SIZE_Y
+        elif l_temp_pos_y < -self.__size_y:
+            l_temp_pos_y = self.__screen_height - self.__size_y
 
         self.update_pos(l_temp_pos_x, l_temp_pos_y)
 
@@ -168,7 +163,7 @@ class Player:
 
         # ==================== When Player is Stunned start a stun timer ============================================
 
-        self.__acc = Player.STUN_ACC
+        self.__acc = self.__stun_acc
         self.__inner_color = pygame.Color(Player.STUN_COLOR)
 
         if not self.stun_timer:
@@ -186,7 +181,7 @@ class Player:
 
         # ==================== Called when stun timer ends ===========================================================
 
-        self.__acc = Player.REG_ACC
+        self.__acc = self.__reg_acc
         self.__inner_color = pygame.Color(Player.REG_COLOR)
 
     def kill(self):
