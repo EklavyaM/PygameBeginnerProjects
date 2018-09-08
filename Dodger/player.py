@@ -29,11 +29,10 @@ class Player:
 
         # ==================== Player Constructor =================================================================
 
-        self.__size_x = l_screen_width/100
-        self.__size_y = self.__size_x
-        self.__reg_acc = l_screen_width/6
+        self.__size = l_screen_width/100
+        self.__reg_acc = l_screen_width/6.5
         self.__stun_acc = self.__reg_acc/4
-        self.__max_velocity = l_screen_width/3.2
+        self.__max_velocity = l_screen_width/3.6
 
         self.__is_alive = True
         self.__screen_width = l_screen_width
@@ -48,9 +47,9 @@ class Player:
         self.__outer_color = pygame.Color("black")
         self.__stroke_width = 2
 
-        self.__hit_box = pygame.Rect(self.__pos_x, self.__pos_y, self.__size_x, self.__size_y)
+        self.__hit_box = pygame.Rect(self.__pos_x, self.__pos_y, self.__size, self.__size)
         self.__inner_box = pygame.Rect(self.__pos_x + self.__stroke_width, self.__pos_y + self.__stroke_width,
-                                       self.__size_x - 2 * self.__stroke_width, self.__size_y - 2 * self.__stroke_width)
+                                       self.__size - 2 * self.__stroke_width, self.__size - 2 * self.__stroke_width)
 
         self.__lives = 3
         self.__current_dir = None
@@ -59,6 +58,8 @@ class Player:
         self.__dx, self.__dy = 0, 0
 
         self.stun_timer = None
+
+        self.__one_up_count = 0
 
     def input(self):
 
@@ -119,13 +120,13 @@ class Player:
 
         if l_temp_pos_x > self.__screen_width:
             l_temp_pos_x = 0
-        elif l_temp_pos_x < -self.__size_x:
-            l_temp_pos_x = self.__screen_width - self.__size_x
+        elif l_temp_pos_x < -self.__size:
+            l_temp_pos_x = self.__screen_width - self.__size
 
         if l_temp_pos_y > self.__screen_height:
             l_temp_pos_y = 0
-        elif l_temp_pos_y < -self.__size_y:
-            l_temp_pos_y = self.__screen_height - self.__size_y
+        elif l_temp_pos_y < -self.__size:
+            l_temp_pos_y = self.__screen_height - self.__size
 
         self.update_pos(l_temp_pos_x, l_temp_pos_y)
 
@@ -144,9 +145,14 @@ class Player:
         pygame.draw.rect(scr, self.__outer_color, self.__hit_box)
         pygame.draw.rect(scr, self.__inner_color, self.__inner_box)
 
-    def life_up(self):
-        if self.__lives < Player.MAX_LIVES:
-            self.__lives += 1
+    def one_up(self):
+
+        self.__one_up_count += 1
+
+        if self.__one_up_count >= 3:
+            if self.__lives < Player.MAX_LIVES:
+                self.__lives += 1
+            self.__one_up_count = 0
 
     def hit(self):
 
@@ -201,3 +207,6 @@ class Player:
 
     def get_is_alive(self):
         return self.__is_alive
+
+    def get_size(self):
+        return self.__size

@@ -2,7 +2,7 @@ import pygame
 import math
 
 
-class EnemyStraightPath:
+class PowerOneUp:
 
     # ==================== Straight Path up or down ===============================================================
 
@@ -11,7 +11,7 @@ class EnemyStraightPath:
 
     TYPES = (DIR_DOWN, DIR_UP)
 
-    FADE = 400
+    FADE = 600
 
     def __init__(self, l_pos_x, l_pos_y, l_vel, l_size, l_type_index):
 
@@ -22,14 +22,20 @@ class EnemyStraightPath:
         self.__velocity = l_vel
         self.__size = l_size
 
-        self.__color = pygame.Color("black")
+        self.__outer_color = pygame.Color("black")
+        self.__stroke_width = 4
 
-        self.__type = EnemyStraightPath.TYPES[l_type_index]
+        self.__inner_color = pygame.Color("white")
+
+        self.__type = PowerOneUp.TYPES[l_type_index]
 
         self.__is_destroyed = False
         self.__has_collided = False
 
         self.__hit_box = pygame.Rect(self.__pos_x, self.__pos_y, self.__size, self.__size)
+        self.__inner_box = pygame.Rect(self.__pos_x + self.__stroke_width, self.__pos_y + self.__stroke_width,
+                                       self.__size - 2 * self.__stroke_width,
+                                       self.__size - 2 * self.__stroke_width)
 
         self.__temp_color_increment = 0
         self.__temp_color_boundary = 256 - self.__temp_color_increment
@@ -41,10 +47,10 @@ class EnemyStraightPath:
 
         if not self.__has_collided:
 
-            if self.__type == EnemyStraightPath.DIR_DOWN:
+            if self.__type == PowerOneUp.DIR_DOWN:
                 self.update_pos(self.__pos_y + self.__velocity * dt)
 
-            elif self.__type == EnemyStraightPath.DIR_UP:
+            elif self.__type == PowerOneUp.DIR_UP:
                 self.update_pos(self.__pos_y - self.__velocity * dt)
 
         else:
@@ -57,31 +63,33 @@ class EnemyStraightPath:
 
         # ==================== fade to white ===============================================================
 
-        self.__temp_color_increment = math.trunc(EnemyStraightPath.FADE * dt)
+        self.__temp_color_increment = math.trunc(PowerOneUp.FADE * dt)
         self.__temp_color_boundary = 256 - self.__temp_color_increment
 
-        if self.__color.r < self.__temp_color_boundary:
-            self.__color.r += self.__temp_color_increment
-        if self.__color.g < self.__temp_color_boundary:
-            self.__color.g += self.__temp_color_increment
-        if self.__color.b < self.__temp_color_boundary:
-            self.__color.b += self.__temp_color_increment
+        if self.__outer_color.r < self.__temp_color_boundary:
+            self.__outer_color.r += self.__temp_color_increment
+        if self.__outer_color.g < self.__temp_color_boundary:
+            self.__outer_color.g += self.__temp_color_increment
+        if self.__outer_color.b < self.__temp_color_boundary:
+            self.__outer_color.b += self.__temp_color_increment
 
         # ==================== death =====================================
 
-        if self.__color.r >= self.__temp_color_boundary \
-                and self.__color.g >= self.__temp_color_boundary \
-                and self.__color.b >= self.__temp_color_boundary:
+        if self.__outer_color.r >= self.__temp_color_boundary \
+                and self.__outer_color.g >= self.__temp_color_boundary \
+                and self.__outer_color.b >= self.__temp_color_boundary:
             self.kill()
 
     def update_pos(self, l_pos_y):
         self.__pos_y = self.__hit_box.top = l_pos_y
+        self.__inner_box.top = self.__pos_y + self.__stroke_width
 
     def draw(self, scr):
 
         # ==================== Drawing the Guy ===========================================================
 
-        pygame.draw.rect(scr, self.__color, self.__hit_box)
+        pygame.draw.rect(scr, self.__outer_color, self.__hit_box)
+        pygame.draw.rect(scr, self.__inner_color, self.__inner_box)
 
     def check_player_collision(self, l_player):
 

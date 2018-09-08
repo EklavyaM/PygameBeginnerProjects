@@ -1,6 +1,7 @@
 import pygame
 import math
-from spawner import EnemySpawn
+from enemy_spawner import EnemySpawner
+from powerup_spawner import PowerupSpawner
 from player import Player
 
 
@@ -44,8 +45,11 @@ class Game:
         self.__player = Player(self.__screen_width // 2, self.__screen_height // 2,
                                self.__screen_width, self.__screen_height)
 
-        self.__asshole_spawner = EnemySpawn(self.__player, self.__screen_width, self.__screen_height,
-                                            self.__font_screen_offset)
+        self.__asshole_spawner = EnemySpawner(self.__player, self.__screen_width, self.__screen_height,
+                                              self.__font_screen_offset)
+
+        self.__powerup_spawner = PowerupSpawner(self.__player, self.__screen_width, self.__screen_height,
+                                                self.__font_screen_offset)
 
         pygame.mixer.music.load(self.__soundtrack)
         pygame.mixer.music.play(-1)
@@ -69,11 +73,12 @@ class Game:
     def input_and_logic(self):
 
         self.__player.input()
+        self.__asshole_spawner.move(self.__time_per_frame_in_seconds)
+        self.__powerup_spawner.move(self.__time_per_frame_in_seconds)
+
         if self.__player.move(self.__time_per_frame_in_seconds) == Player.ERR_CODE_DEATH:
             print("Score: " + self.get_score())
             self.__game_running = False
-
-        self.__asshole_spawner.move(self.__time_per_frame_in_seconds)
 
     def draw(self):
 
@@ -88,6 +93,7 @@ class Game:
 
     def draw_entities(self):
         self.__asshole_spawner.draw(self.__screen)
+        self.__powerup_spawner.draw(self.__screen)
         self.__player.draw(self.__screen)
 
     def draw_text(self):
@@ -119,4 +125,5 @@ class Game:
 
         elif self.__score > self.__check_score_multiplier * self.__check_score_min_bound:
             self.__asshole_spawner.increase_difficulty()
+            self.__powerup_spawner.increase_difficulty()
             self.__check_score_min_bound *= self.__check_score_multiplier

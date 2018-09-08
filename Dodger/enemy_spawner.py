@@ -1,10 +1,10 @@
 from time import sleep
 from random import randint
 from threading import Timer
-from enemy_straight_path import StraightPath
+from enemy_straight_path import EnemyStraightPath
 
 
-class EnemySpawn:
+class EnemySpawner:
 
     # ==================== The sleep time of the Spawning thread is decreased by increasing ==========================
     # ==================== the Difficulty value thereby making it spawn assholes faster ==============================
@@ -19,7 +19,7 @@ class EnemySpawn:
 
     def __init__(self, l_player, l_screen_width, l_screen_height, l_bottom_offset):
 
-        # ==================== EnemySpawn Constructor ==========================================================
+        # ==================== EnemySpawner Constructor ==========================================================
         # ==================== Needs a player instance for collision detection =====================================
 
         self.__enemies = []
@@ -27,14 +27,13 @@ class EnemySpawn:
         self.__screen_height = l_screen_height
         self.__bottom_offset = l_bottom_offset
 
-        self.__thread_spawn = Timer(EnemySpawn.INITIAL_WAIT, self.__spawn)
+        self.__thread_spawn = Timer(EnemySpawner.INITIAL_WAIT, self.__spawn)
         self.__sleep_time = 0.8
 
         self.__temp_pos_x = 0
         self.__temp_pos_y = 0
         self.__temp_vel = 0
-        self.__temp_size_x = 0
-        self.__temp_size_y = 0
+        self.__temp_size = 0
         self.__temp_type_index = 0
 
         self.__player = l_player
@@ -64,28 +63,28 @@ class EnemySpawn:
         while self.__player.get_is_alive():
 
             self.__temp_vel = randint(self.__screen_width // 160, self.__screen_width//3)
-            self.__temp_size_x = self.__temp_size_y = randint(self.__screen_width//200, self.__screen_width//100)
-            self.__temp_pos_x = randint(0, self.__screen_width - self.__temp_size_x)
-            self.__temp_type_index = randint(0, len(StraightPath.TYPES) - 1)
+            self.__temp_size = randint(self.__screen_width//200, self.__screen_width//100)
+            self.__temp_pos_x = randint(0, self.__screen_width - self.__temp_size)
+            self.__temp_type_index = randint(0, len(EnemyStraightPath.TYPES) - 1)
 
-            if StraightPath.TYPES[self.__temp_type_index] == StraightPath.DIR_DOWN:
-                self.__temp_pos_y = -self.__temp_size_y
+            if EnemyStraightPath.TYPES[self.__temp_type_index] == EnemyStraightPath.DIR_DOWN:
+                self.__temp_pos_y = -self.__temp_size
 
-            elif StraightPath.TYPES[self.__temp_type_index] == StraightPath.DIR_UP:
+            elif EnemyStraightPath.TYPES[self.__temp_type_index] == EnemyStraightPath.DIR_UP:
                 self.__temp_pos_y = self.__screen_height
 
-            self.__enemies.append(StraightPath(self.__temp_pos_x, self.__temp_pos_y,
-                                               self.__temp_vel,
-                                               self.__temp_size_x, self.__temp_size_y,
-                                               self.__temp_type_index))
+            self.__enemies.append(EnemyStraightPath(self.__temp_pos_x, self.__temp_pos_y,
+                                                    self.__temp_vel,
+                                                    self.__temp_size,
+                                                    self.__temp_type_index))
             sleep(self.__sleep_time)
 
     def increase_difficulty(self):
 
         # ==================== Try not to change this ======================================================
 
-        if self.__sleep_time - EnemySpawn.DIFFICULTY_VALUE >= EnemySpawn.THRESHOLD_DIFFICULTY:
-            self.__sleep_time -= EnemySpawn.DIFFICULTY_VALUE
+        if self.__sleep_time - EnemySpawner.DIFFICULTY_VALUE >= EnemySpawner.THRESHOLD_DIFFICULTY:
+            self.__sleep_time -= EnemySpawner.DIFFICULTY_VALUE
 
     def move(self, dt):
 
@@ -99,7 +98,7 @@ class EnemySpawn:
 
             enemy.move(dt)
             self.check_boundary(enemy)
-            EnemySpawn.check_player_collision(enemy, self.__player)
+            EnemySpawner.check_player_collision(enemy, self.__player)
 
     def draw(self, scr):
 
@@ -110,12 +109,12 @@ class EnemySpawn:
 
     def check_boundary(self, l_enemy):
 
-        # ==================== Check if StraightPath crossed the Boundary  ================================
+        # ==================== Check if EnemyStraightPath crossed the Boundary  ================================
 
-        if l_enemy.get_type() == StraightPath.DIR_DOWN:
-            if l_enemy.get_pos_y() + l_enemy.get_size_y() >= self.__screen_height - self.__bottom_offset:
+        if l_enemy.get_type() == EnemyStraightPath.DIR_DOWN:
+            if l_enemy.get_pos_y() + l_enemy.get_size() >= self.__screen_height - self.__bottom_offset:
                 l_enemy.set_has_collided(True)
 
-        elif l_enemy.get_type() == StraightPath.DIR_UP:
+        elif l_enemy.get_type() == EnemyStraightPath.DIR_UP:
             if l_enemy.get_pos_y() <= 0:
                 l_enemy.set_has_collided(True)
