@@ -22,6 +22,7 @@ class PowerupSpawner:
         self.__bottom_offset = l_bottom_offset
 
         self.__thread_spawn = Timer(PowerupSpawner.INITIAL_WAIT, self.__spawn)
+        self.__thread_spawn.setDaemon(True)
         self.__sleep_time = 10
 
         self.__temp_pos_x = 0
@@ -106,9 +107,9 @@ class PowerupSpawner:
         # ==================== Check if EnemyStraightPath crossed the Boundary  ================================
 
         if l_powerup.get_type() == PowerOneUp.DIR_DOWN:
-            if l_powerup.get_pos_y() + l_powerup.get_size() >= self.__screen_height - self.__bottom_offset:
+            if l_powerup.get_pos_y() + l_powerup.get_size() >= self.__screen_height:
                 l_powerup.set_has_collided(True)
 
         elif l_powerup.get_type() == PowerOneUp.DIR_UP:
-            if l_powerup.get_pos_y() <= 0:
+            if l_powerup.get_pos_y() <= self.__bottom_offset:
                 l_powerup.set_has_collided(True)

@@ -28,6 +28,7 @@ class EnemySpawner:
         self.__bottom_offset = l_bottom_offset
 
         self.__thread_spawn = Timer(EnemySpawner.INITIAL_WAIT, self.__spawn)
+        self.__thread_spawn.setDaemon(True)
         self.__sleep_time = 0.8
 
         self.__temp_pos_x = 0
@@ -112,9 +113,10 @@ class EnemySpawner:
         # ==================== Check if EnemyStraightPath crossed the Boundary  ================================
 
         if l_enemy.get_type() == EnemyStraightPath.DIR_DOWN:
-            if l_enemy.get_pos_y() + l_enemy.get_size() >= self.__screen_height - self.__bottom_offset:
+            if l_enemy.get_pos_y() + l_enemy.get_size() >= self.__screen_height:
                 l_enemy.set_has_collided(True)
 
         elif l_enemy.get_type() == EnemyStraightPath.DIR_UP:
-            if l_enemy.get_pos_y() <= 0:
+            if l_enemy.get_pos_y() <= self.__bottom_offset:
                 l_enemy.set_has_collided(True)
+

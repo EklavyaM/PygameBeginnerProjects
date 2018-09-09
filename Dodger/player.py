@@ -25,7 +25,7 @@ class Player:
 
     MAX_LIVES = 5
 
-    def __init__(self, l_pos_x, l_pos_y, l_screen_width, l_screen_height):
+    def __init__(self, l_pos_x, l_pos_y, l_screen_width, l_screen_height, l_bottom_offset):
 
         # ==================== Player Constructor =================================================================
 
@@ -37,6 +37,7 @@ class Player:
         self.__is_alive = True
         self.__screen_width = l_screen_width
         self.__screen_height = l_screen_height
+        self.__bottom_offset = l_bottom_offset
         self.__pos_x = l_pos_x
         self.__pos_y = l_pos_y
         self.__vel_x = 0
@@ -70,7 +71,7 @@ class Player:
         if self.__dx != 1 and (self.__keys[pygame.K_LEFT] or self.__keys[pygame.K_a]):
             self.__dy = 0
             self.__dx = -1
-        if self.__dx !=-1 and (self.__keys[pygame.K_RIGHT] or self.__keys[pygame.K_d]):
+        if self.__dx != -1 and (self.__keys[pygame.K_RIGHT] or self.__keys[pygame.K_d]):
             self.__dy = 0
             self.__dx = 1
         if self.__dy != 1 and (self.__keys[pygame.K_UP] or self.__keys[pygame.K_w]):
@@ -118,15 +119,23 @@ class Player:
         l_temp_pos_x = self.__pos_x + self.__vel_x * dt
         l_temp_pos_y = self.__pos_y + self.__vel_y * dt
 
-        if l_temp_pos_x > self.__screen_width:
-            l_temp_pos_x = 0
-        elif l_temp_pos_x < -self.__size:
+        if l_temp_pos_x > self.__screen_width - self.__size:
             l_temp_pos_x = self.__screen_width - self.__size
+            if self.__dx > 0:
+                self.__dx = -1
+        elif l_temp_pos_x < 0:
+            l_temp_pos_x = 0
+            if self.__dx < 0:
+                self.__dx = 1
 
-        if l_temp_pos_y > self.__screen_height:
-            l_temp_pos_y = 0
-        elif l_temp_pos_y < -self.__size:
+        if l_temp_pos_y > self.__screen_height - self.__size:
             l_temp_pos_y = self.__screen_height - self.__size
+            if self.__dy > 0:
+                self.__dy = -1
+        elif l_temp_pos_y < self.__bottom_offset:
+            l_temp_pos_y = self.__bottom_offset
+            if self.__dy < 0:
+                self.__dy = 1
 
         self.update_pos(l_temp_pos_x, l_temp_pos_y)
 

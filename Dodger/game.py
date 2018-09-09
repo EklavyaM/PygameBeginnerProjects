@@ -21,9 +21,9 @@ class Game:
         self.__score = 0
         self.__score_frame_increment = 1
 
-        self.__font_size = l_screen_height//37
+        self.__font_size = l_screen_height//40
         self.__font_style = "cousine"
-        self.__font_screen_offset = l_screen_width//160
+        self.__font_screen_offset = self.__font_size + 2
 
         self.__score_text = None
         self.__lives_text = None
@@ -43,7 +43,7 @@ class Game:
         pygame.display.set_caption(self.__screen_title)
 
         self.__player = Player(self.__screen_width // 2, self.__screen_height // 2,
-                               self.__screen_width, self.__screen_height)
+                               self.__screen_width, self.__screen_height, self.__font_screen_offset)
 
         self.__asshole_spawner = EnemySpawner(self.__player, self.__screen_width, self.__screen_height,
                                               self.__font_screen_offset)
@@ -84,7 +84,7 @@ class Game:
 
         self.draw_background()
         self.draw_entities()
-        self.draw_text()
+        self.draw_ui()
 
         pygame.display.flip()
 
@@ -96,14 +96,15 @@ class Game:
         self.__powerup_spawner.draw(self.__screen)
         self.__player.draw(self.__screen)
 
-    def draw_text(self):
-        self.__score_text = self.__font.render("Score: " + self.get_score(), True, (0, 0, 0))
-        self.__lives_text = self.__font.render("Lives: " + str(self.__player.get_lives()), True, (0, 0, 0))
+    def draw_ui(self):
+        pygame.draw.rect(self.__screen, pygame.Color("black"), (0,0, self.__screen_width, self.__font_screen_offset))
+        self.__score_text = self.__font.render("Score: " + self.get_score(), True, (255, 255, 255))
+        self.__lives_text = self.__font.render("Lives: " + str(self.__player.get_lives()), True, (255, 255, 255))
 
         self.__screen.blit(self.__score_text,
                            (self.__screen_width // 2 - self.__score_text.get_rect().width // 2,
-                            self.__screen_height - self.__font_size))
-        self.__screen.blit(self.__lives_text, (self.__font_screen_offset, self.__screen_height - self.__font_size))
+                            0))
+        self.__screen.blit(self.__lives_text, (10, 0))
 
     def get_score(self):
         return str(math.trunc(self.__score))
