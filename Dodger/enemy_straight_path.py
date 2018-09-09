@@ -13,7 +13,11 @@ class EnemyStraightPath:
 
     FADE = 400
 
-    def __init__(self, l_pos_x, l_pos_y, l_vel, l_size, l_type_index):
+    def __init__(self, l_pos_x, l_pos_y,
+                 l_vel,
+                 l_size,
+                 l_color,
+                 l_type_index):
 
         # ==================== EnemyStraightPath Constructor ==========================================================
 
@@ -21,8 +25,7 @@ class EnemyStraightPath:
         self.__pos_y = l_pos_y
         self.__velocity = l_vel
         self.__size = l_size
-
-        self.__color = pygame.Color("black")
+        self.__color = pygame.Color(l_color[0], l_color[1], l_color[2])
 
         self.__type = EnemyStraightPath.TYPES[l_type_index]
 

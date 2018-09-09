@@ -7,6 +7,18 @@ from player import Player
 
 class Game:
 
+    CLR_BG = (255, 255, 255)
+    CLR_UI_BG = (0, 0, 0)
+    CLR_UI_TXT_LIF = (0, 201, 87)
+    CLR_UI_TXT_SCR = (255, 255, 255)
+    CLR_PLR_REG_OUT = (0, 0, 0)
+    CLR_PLR_REG_IN = (255, 255, 255)
+    CLR_PLR_STN_OUT = (0, 0, 0)
+    CLR_PLR_STN_IN = (0, 0, 0)
+    CLR_ENM = (0, 0, 0)
+    CLR_POW_LIF_OUT = (0, 0, 0)
+    CLR_POW_LIF_IN = (255, 255, 255)
+
     def __init__(self, l_screen_width, l_screen_height, l_screen_title, l_frame_rate):
         self.__screen_width = l_screen_width
         self.__screen_height = l_screen_height
@@ -43,12 +55,18 @@ class Game:
         pygame.display.set_caption(self.__screen_title)
 
         self.__player = Player(self.__screen_width // 2, self.__screen_height // 2,
-                               self.__screen_width, self.__screen_height, self.__font_screen_offset)
+                               Game.CLR_PLR_REG_IN, Game.CLR_PLR_REG_OUT, Game.CLR_PLR_STN_IN, Game.CLR_PLR_STN_OUT,
+                               self.__screen_width, self.__screen_height,
+                               self.__font_screen_offset)
 
-        self.__asshole_spawner = EnemySpawner(self.__player, self.__screen_width, self.__screen_height,
+        self.__asshole_spawner = EnemySpawner(self.__player,
+                                              self.CLR_ENM,
+                                              self.__screen_width, self.__screen_height,
                                               self.__font_screen_offset)
 
-        self.__powerup_spawner = PowerupSpawner(self.__player, self.__screen_width, self.__screen_height,
+        self.__powerup_spawner = PowerupSpawner(self.__player,
+                                                self.CLR_POW_LIF_IN, self.CLR_POW_LIF_OUT,
+                                                self.__screen_width, self.__screen_height,
                                                 self.__font_screen_offset)
 
         pygame.mixer.music.load(self.__soundtrack)
@@ -89,7 +107,7 @@ class Game:
         pygame.display.flip()
 
     def draw_background(self):
-        self.__screen.fill(pygame.Color("white"))
+        self.__screen.fill(Game.CLR_BG)
 
     def draw_entities(self):
         self.__asshole_spawner.draw(self.__screen)
@@ -97,9 +115,10 @@ class Game:
         self.__player.draw(self.__screen)
 
     def draw_ui(self):
-        pygame.draw.rect(self.__screen, pygame.Color("black"), (0,0, self.__screen_width, self.__font_screen_offset))
-        self.__score_text = self.__font.render("Score: " + self.get_score(), True, (255, 255, 255))
-        self.__lives_text = self.__font.render("Lives: " + str(self.__player.get_lives()), True, (255, 255, 255))
+        pygame.draw.rect(self.__screen, Game.CLR_UI_BG,
+                         (0, 0, self.__screen_width, self.__font_screen_offset))
+        self.__score_text = self.__font.render("Score: " + self.get_score(), True, Game.CLR_UI_TXT_SCR)
+        self.__lives_text = self.__font.render("Lives: " + str(self.__player.get_lives()), True, Game.CLR_UI_TXT_LIF)
 
         self.__screen.blit(self.__score_text,
                            (self.__screen_width // 2 - self.__score_text.get_rect().width // 2,

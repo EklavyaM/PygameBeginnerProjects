@@ -11,7 +11,10 @@ class PowerupSpawner:
 
     INITIAL_WAIT = 10
 
-    def __init__(self, l_player, l_screen_width, l_screen_height, l_bottom_offset):
+    def __init__(self, l_player,
+                 l_life_in, l_life_out,
+                 l_screen_width, l_screen_height,
+                 l_bottom_offset):
 
         # ==================== Powerup Constructor ==========================================================
         # ==================== Needs a player instance for collision detection =====================================
@@ -29,6 +32,8 @@ class PowerupSpawner:
         self.__temp_pos_y = 0
         self.__temp_size = 0
         self.__temp_vel = 0
+        self.__temp_color_in = l_life_in
+        self.__temp_color_out = l_life_out
         self.__temp_type_index = 0
 
         self.__player = l_player
@@ -71,6 +76,7 @@ class PowerupSpawner:
             self.__power_ups.append(PowerOneUp(self.__temp_pos_x, self.__temp_pos_y,
                                                self.__temp_vel,
                                                self.__temp_size,
+                                               self.__temp_color_in, self.__temp_color_out,
                                                self.__temp_type_index))
             sleep(self.__sleep_time)
 

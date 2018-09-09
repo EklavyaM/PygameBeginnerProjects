@@ -13,7 +13,11 @@ class PowerOneUp:
 
     FADE = 600
 
-    def __init__(self, l_pos_x, l_pos_y, l_vel, l_size, l_type_index):
+    def __init__(self, l_pos_x, l_pos_y,
+                 l_vel,
+                 l_size,
+                 l_color_in, l_color_out,
+                 l_type_index):
 
         # ==================== EnemyStraightPath Constructor ==========================================================
 
@@ -22,10 +26,10 @@ class PowerOneUp:
         self.__velocity = l_vel
         self.__size = l_size
 
-        self.__outer_color = pygame.Color("black")
         self.__stroke_width = 4
 
-        self.__inner_color = pygame.Color("white")
+        self.__inner_color = pygame.Color(l_color_in[0], l_color_in[1], l_color_in[2])
+        self.__outer_color = pygame.Color(l_color_out[0], l_color_out[1], l_color_out[2])
 
         self.__type = PowerOneUp.TYPES[l_type_index]
 
@@ -73,11 +77,18 @@ class PowerOneUp:
         if self.__outer_color.b < self.__temp_color_boundary:
             self.__outer_color.b += self.__temp_color_increment
 
-        # ==================== death =====================================
+        if self.__inner_color.r < self.__temp_color_boundary:
+            self.__inner_color.r += self.__temp_color_increment
+        if self.__inner_color.g < self.__temp_color_boundary:
+            self.__inner_color.g += self.__temp_color_increment
+        if self.__inner_color.b < self.__temp_color_boundary:
+            self.__inner_color.b += self.__temp_color_increment
 
-        if self.__outer_color.r >= self.__temp_color_boundary \
-                and self.__outer_color.g >= self.__temp_color_boundary \
-                and self.__outer_color.b >= self.__temp_color_boundary:
+        # ==================== death =======================================================================
+
+        if (self.__outer_color.r >= self.__temp_color_boundary
+                and self.__outer_color.g >= self.__temp_color_boundary
+                and self.__outer_color.b >= self.__temp_color_boundary):
             self.kill()
 
     def update_pos(self, l_pos_y):

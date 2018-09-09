@@ -17,7 +17,10 @@ class EnemySpawner:
 
     INITIAL_WAIT = 3
 
-    def __init__(self, l_player, l_screen_width, l_screen_height, l_bottom_offset):
+    def __init__(self, l_player,
+                 l_enemy_color,
+                 l_screen_width, l_screen_height,
+                 l_bottom_offset):
 
         # ==================== EnemySpawner Constructor ==========================================================
         # ==================== Needs a player instance for collision detection =====================================
@@ -35,6 +38,7 @@ class EnemySpawner:
         self.__temp_pos_y = 0
         self.__temp_vel = 0
         self.__temp_size = 0
+        self.__temp_color = l_enemy_color
         self.__temp_type_index = 0
 
         self.__player = l_player
@@ -77,6 +81,7 @@ class EnemySpawner:
             self.__enemies.append(EnemyStraightPath(self.__temp_pos_x, self.__temp_pos_y,
                                                     self.__temp_vel,
                                                     self.__temp_size,
+                                                    self.__temp_color,
                                                     self.__temp_type_index))
             sleep(self.__sleep_time)
 
