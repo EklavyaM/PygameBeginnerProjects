@@ -1,4 +1,4 @@
-from time import sleep
+import time
 from random import randint
 from threading import Timer
 from enemy_straight_path import EnemyStraightPath
@@ -12,13 +12,13 @@ class EnemySpawner:
     # ==================== The THRESHOLD_DIFFICULTY value is the minimum sleep time required =====================
     # ==================== by the Spawning thread. Any less than 0.07 makes the game far too difficult =============
 
-    DIFFICULTY_VALUE = 0.03
-    THRESHOLD_DIFFICULTY = 0.07
+    DIFFICULTY_VALUE = 0.035
+    THRESHOLD_DIFFICULTY = 0.1
 
     INITIAL_WAIT = 3
 
     def __init__(self, l_player,
-                 l_enemy_color,
+                 l_color_enemy, l_color_fade,
                  l_screen_width, l_screen_height,
                  l_bottom_offset):
 
@@ -38,7 +38,8 @@ class EnemySpawner:
         self.__temp_pos_y = 0
         self.__temp_vel = 0
         self.__temp_size = 0
-        self.__temp_color = l_enemy_color
+        self.__temp_color_enemy = l_color_enemy
+        self.__temp_color_fade = l_color_fade
         self.__temp_type_index = 0
 
         self.__player = l_player
@@ -62,7 +63,6 @@ class EnemySpawner:
         # ==================== Spawn function called by thread_spawn =============================================
         # ==================== Uses random values for x-position, velocity and size of an enemy ==================
         # ==================== After Spawning takes a break for few seconds ========================================
-
         # ==================== Change values for different enemy behavior and visuals ============================
 
         while self.__player.get_is_alive():
@@ -81,9 +81,9 @@ class EnemySpawner:
             self.__enemies.append(EnemyStraightPath(self.__temp_pos_x, self.__temp_pos_y,
                                                     self.__temp_vel,
                                                     self.__temp_size,
-                                                    self.__temp_color,
+                                                    self.__temp_color_enemy, self.__temp_color_fade,
                                                     self.__temp_type_index))
-            sleep(self.__sleep_time)
+            time.sleep(self.__sleep_time)
 
     def increase_difficulty(self):
 
@@ -124,4 +124,3 @@ class EnemySpawner:
         elif l_enemy.get_type() == EnemyStraightPath.DIR_UP:
             if l_enemy.get_pos_y() <= self.__bottom_offset:
                 l_enemy.set_has_collided(True)
-

@@ -1,5 +1,6 @@
 import pygame
 import math
+from random import randint
 from threading import Timer
 
 
@@ -17,6 +18,7 @@ class Player:
     DIR_RIGHT = 3
 
     ERR_CODE_DEATH = 0
+    INFO_CODE_HIT_ONCE = 1
 
     MAX_LIVES = 5
 
@@ -32,12 +34,28 @@ class Player:
         self.__stun_acc = self.__reg_acc/4
         self.__max_velocity = l_screen_width/3.6
 
+        self.__rebound_sound = pygame.mixer.Sound("Sounds/sfx_rebound.wav")
+        self.__rebound_sound.set_volume(0.5)
+
+        self.__coin_collect_sound_single = pygame.mixer.Sound("Sounds/sfx_coin_single.wav")
+        self.__coin_collect_sound_single.set_volume(0.6)
+
+        self.__coin_collect_sound_double = pygame.mixer.Sound("Sounds/sfx_coin_double.wav")
+        self.__coin_collect_sound_double.set_volume(0.6)
+
+        self.__one_up_sound = pygame.mixer.Sound("Sounds/sfx_coin_cluster.wav")
+        self.__one_up_sound.set_volume(0.7)
+
+        self.__damage_sounds = [pygame.mixer.Sound("Sounds/sfx_sounds_damage1.wav"),
+                                pygame.mixer.Sound("Sounds/sfx_sounds_damage2.wav")]
+        self.__damage_sounds[0].set_volume(0.7)
+        self.__damage_sounds[1].set_volume(0.7)
+
         self.__REG_COLOR_IN = l_reg_color_in
         self.__REG_COLOR_OUT = _l_reg_color_out
         self.__STUN_COLOR_IN = l_stun_color_in
         self.__STUN_COLOR_OUT = l_stun_color_out
 
-        self.__is_alive = True
         self.__screen_width = l_screen_width
         self.__screen_height = l_screen_height
         self.__bottom_offset = l_bottom_offset
@@ -47,10 +65,12 @@ class Player:
         self.__vel_y = 0
         self.__acc = self.__reg_acc
 
+        self.__is_alive = True
+
         self.__inner_color = self.__REG_COLOR_IN
         self.__outer_color = self.__REG_COLOR_OUT
 
-        self.__stroke_width = 2
+        self.__stroke_width = l_screen_width/800
 
         self.__hit_box = pygame.Rect(self.__pos_x, self.__pos_y, self.__size, self.__size)
         self.__inner_box = pygame.Rect(self.__pos_x + self.__stroke_width, self.__pos_y + self.__stroke_width,
@@ -62,28 +82,41 @@ class Player:
         self.__keys = None
         self.__dx, self.__dy = 0, 0
 
-        self.stun_timer = None
+        self.__stun_timer = None
+        self.__time_stunned = 0
+        self.__time_stunned_remaining = 0
 
         self.__one_up_count = 0
 
-    def input(self):
+        self.__has_been_hit_once = False
 
-        # ==================== Polling for Input =================================================================
-
-        self.__keys = pygame.key.get_pressed()
-
-        if self.__dx != 1 and (self.__keys[pygame.K_LEFT] or self.__keys[pygame.K_a]):
-            self.__dy = 0
+    def move_left(self):
+        if self.__dx != 1:
             self.__dx = -1
-        if self.__dx != -1 and (self.__keys[pygame.K_RIGHT] or self.__keys[pygame.K_d]):
             self.__dy = 0
+            return True
+        return False
+
+    def move_right(self):
+        if self.__dx != -1:
             self.__dx = 1
-        if self.__dy != 1 and (self.__keys[pygame.K_UP] or self.__keys[pygame.K_w]):
+            self.__dy = 0
+            return True
+        return False
+
+    def move_up(self):
+        if self.__dy != 1:
             self.__dy = -1
             self.__dx = 0
-        if self.__dy != -1 and (self.__keys[pygame.K_DOWN] or self.__keys[pygame.K_s]):
+            return True
+        return False
+
+    def move_down(self):
+        if self.__dy != -1:
             self.__dy = 1
             self.__dx = 0
+            return True
+        return False
 
     def move(self, dt):
 
@@ -91,6 +124,10 @@ class Player:
 
         if not self.__is_alive:
             return Player.ERR_CODE_DEATH
+
+        if self.__has_been_hit_once:
+            self.__has_been_hit_once = False
+            return Player.INFO_CODE_HIT_ONCE
 
         updated_vel_x = self.__vel_x + self.__dx * self.__acc
         updated_vel_y = self.__vel_y + self.__dy * self.__acc
@@ -127,19 +164,25 @@ class Player:
             l_temp_pos_x = self.__screen_width - self.__size
             if self.__dx > 0:
                 self.__dx = -1
+                self.play_rebound_sound()
+
         elif l_temp_pos_x < 0:
             l_temp_pos_x = 0
             if self.__dx < 0:
                 self.__dx = 1
+                self.play_rebound_sound()
 
         if l_temp_pos_y > self.__screen_height - self.__size:
             l_temp_pos_y = self.__screen_height - self.__size
             if self.__dy > 0:
                 self.__dy = -1
+                self.play_rebound_sound()
+
         elif l_temp_pos_y < self.__bottom_offset:
             l_temp_pos_y = self.__bottom_offset
             if self.__dy < 0:
                 self.__dy = 1
+                self.play_rebound_sound()
 
         self.update_pos(l_temp_pos_x, l_temp_pos_y)
 
@@ -162,17 +205,24 @@ class Player:
 
         self.__one_up_count += 1
 
-        if self.__one_up_count >= 3:
+        if self.__one_up_count == 3:
             if self.__lives < Player.MAX_LIVES:
                 self.__lives += 1
+
+            self.play_one_up_sound()
             self.__one_up_count = 0
+        elif self.__one_up_count == 2:
+            self.play_coin_collect_sound_double()
+        elif self.__one_up_count == 1:
+            self.play_coin_collect_sound_single()
 
     def hit(self):
 
         # ==================== When Player is Hit =================================================================
+        self.__has_been_hit_once = True
 
         self.__lives -= 1
-
+        self.play_damage_sound()
         if self.__lives <= 0:
             self.kill()
         else:
@@ -186,21 +236,20 @@ class Player:
         self.__inner_color = self.__STUN_COLOR_IN
         self.__outer_color = self.__STUN_COLOR_OUT
 
-        if not self.stun_timer:
-            self.stun_timer = Timer(Player.STUN_TIME, self.un_stun)
-            self.stun_timer.start()
+        if not self.__stun_timer:
+            self.__stun_timer = Timer(Player.STUN_TIME, self.un_stun)
+            self.__stun_timer.start()
 
         else:
-            if self.stun_timer.is_alive():
-                self.stun_timer.cancel()
+            if self.__stun_timer.is_alive():
+                self.__stun_timer.cancel()
 
-            self.stun_timer = Timer(Player.STUN_TIME, self.un_stun)
-            self.stun_timer.start()
+            self.__stun_timer = Timer(Player.STUN_TIME, self.un_stun)
+            self.__stun_timer.start()
 
     def un_stun(self):
 
         # ==================== Called when stun timer ends ===========================================================
-
         self.__acc = self.__reg_acc
         self.__inner_color = self.__REG_COLOR_IN
         self.__outer_color = self.__REG_COLOR_OUT
@@ -211,8 +260,27 @@ class Player:
 
         self.__is_alive = False
 
-        if self.stun_timer:
-            self.stun_timer.cancel()
+        if self.__stun_timer:
+            self.__stun_timer.cancel()
+
+        # ==================== All Sounds =================================================================
+
+    def play_rebound_sound(self):
+        pygame.mixer.Sound.play(self.__rebound_sound)
+
+    def play_coin_collect_sound_single(self):
+        pygame.mixer.Sound.play(self.__coin_collect_sound_single)
+
+    def play_coin_collect_sound_double(self):
+        pygame.mixer.Sound.play(self.__coin_collect_sound_double)
+
+    def play_one_up_sound(self):
+        pygame.mixer.Sound.play(self.__one_up_sound)
+
+    def play_damage_sound(self):
+        pygame.mixer.Sound.play(self.__damage_sounds[randint(0, len(self.__damage_sounds)-1)])
+
+    # ==================== Getters and Setters =================================================================
 
     def get_lives(self):
         return self.__lives

@@ -11,12 +11,14 @@ class PowerOneUp:
 
     TYPES = (DIR_DOWN, DIR_UP)
 
-    FADE = 600
+    FADE_RATE = 200
+    FADE_OFFSET = 5
 
     def __init__(self, l_pos_x, l_pos_y,
                  l_vel,
                  l_size,
-                 l_color_in, l_color_out,
+                 l_color_in, l_color_out, l_color_fade,
+                 l_stroke_width,
                  l_type_index):
 
         # ==================== EnemyStraightPath Constructor ==========================================================
@@ -26,10 +28,11 @@ class PowerOneUp:
         self.__velocity = l_vel
         self.__size = l_size
 
-        self.__stroke_width = 4
+        self.__stroke_width = l_stroke_width
 
         self.__inner_color = pygame.Color(l_color_in[0], l_color_in[1], l_color_in[2])
         self.__outer_color = pygame.Color(l_color_out[0], l_color_out[1], l_color_out[2])
+        self.__fade_color = pygame.Color(l_color_fade[0], l_color_fade[1], l_color_fade[2])
 
         self.__type = PowerOneUp.TYPES[l_type_index]
 
@@ -42,7 +45,7 @@ class PowerOneUp:
                                        self.__size - 2 * self.__stroke_width)
 
         self.__temp_color_increment = 0
-        self.__temp_color_boundary = 256 - self.__temp_color_increment
+        self.__temp_color_boundary = (255, 255, 255)
 
     def move(self, dt):
 
@@ -67,28 +70,44 @@ class PowerOneUp:
 
         # ==================== fade to white ===============================================================
 
-        self.__temp_color_increment = math.trunc(PowerOneUp.FADE * dt)
-        self.__temp_color_boundary = 256 - self.__temp_color_increment
+        self.__temp_color_increment = math.trunc(PowerOneUp.FADE_RATE * dt)
 
-        if self.__outer_color.r < self.__temp_color_boundary:
-            self.__outer_color.r += self.__temp_color_increment
-        if self.__outer_color.g < self.__temp_color_boundary:
-            self.__outer_color.g += self.__temp_color_increment
-        if self.__outer_color.b < self.__temp_color_boundary:
-            self.__outer_color.b += self.__temp_color_increment
-
-        if self.__inner_color.r < self.__temp_color_boundary:
+        if self.__fade_color.r - self.__inner_color.r > PowerOneUp.FADE_OFFSET:
             self.__inner_color.r += self.__temp_color_increment
-        if self.__inner_color.g < self.__temp_color_boundary:
+        elif self.__fade_color.r - self.__inner_color.r < - PowerOneUp.FADE_OFFSET:
+            self.__inner_color.r -= self.__temp_color_increment
+
+        if self.__fade_color.g - self.__inner_color.g > PowerOneUp.FADE_OFFSET:
             self.__inner_color.g += self.__temp_color_increment
-        if self.__inner_color.b < self.__temp_color_boundary:
+        elif self.__fade_color.g - self.__inner_color.g < - PowerOneUp.FADE_OFFSET:
+            self.__inner_color.g -= self.__temp_color_increment
+
+        if self.__fade_color.b - self.__inner_color.b > PowerOneUp.FADE_OFFSET:
             self.__inner_color.b += self.__temp_color_increment
+        elif self.__fade_color.b - self.__inner_color.b < - PowerOneUp.FADE_OFFSET:
+            self.__inner_color.b -= self.__temp_color_increment
 
-        # ==================== death =======================================================================
+        if self.__fade_color.r - self.__outer_color.r > PowerOneUp.FADE_OFFSET:
+            self.__outer_color.r += self.__temp_color_increment
+        elif self.__fade_color.r - self.__outer_color.r < - PowerOneUp.FADE_OFFSET:
+            self.__outer_color.r -= self.__temp_color_increment
 
-        if (self.__outer_color.r >= self.__temp_color_boundary
-                and self.__outer_color.g >= self.__temp_color_boundary
-                and self.__outer_color.b >= self.__temp_color_boundary):
+        if self.__fade_color.g - self.__outer_color.g > PowerOneUp.FADE_OFFSET:
+            self.__outer_color.g += self.__temp_color_increment
+        elif self.__fade_color.g - self.__outer_color.g < - PowerOneUp.FADE_OFFSET:
+            self.__outer_color.g -= self.__temp_color_increment
+
+        if self.__fade_color.b - self.__outer_color.b > PowerOneUp.FADE_OFFSET:
+            self.__outer_color.b += self.__temp_color_increment
+        elif self.__fade_color.b - self.__outer_color.b < - PowerOneUp.FADE_OFFSET:
+            self.__outer_color.b -= self.__temp_color_increment
+
+        if math.fabs(self.__fade_color.r - self.__inner_color.r) <= PowerOneUp.FADE_OFFSET and \
+                math.fabs(self.__fade_color.g - self.__inner_color.g) <= PowerOneUp.FADE_OFFSET and \
+                math.fabs(self.__fade_color.b - self.__inner_color.b) <= PowerOneUp.FADE_OFFSET and \
+                math.fabs(self.__fade_color.r - self.__outer_color.r) <= PowerOneUp.FADE_OFFSET and \
+                math.fabs(self.__fade_color.g - self.__outer_color.g) <= PowerOneUp.FADE_OFFSET and \
+                math.fabs(self.__fade_color.b - self.__outer_color.b) <= PowerOneUp.FADE_OFFSET:
             self.kill()
 
     def update_pos(self, l_pos_y):

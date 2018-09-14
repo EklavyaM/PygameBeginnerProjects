@@ -6,18 +6,18 @@ from power_one_up import PowerOneUp
 
 class PowerupSpawner:
 
-    DIFFICULTY_VALUE = 0.03
-    THRESHOLD_DIFFICULTY = 3
+    DIFFICULTY_VALUE = 0.15
+    THRESHOLD_DIFFICULTY = 2
 
     INITIAL_WAIT = 10
 
     def __init__(self, l_player,
-                 l_life_in, l_life_out,
+                 l_life_in, l_life_out, l_life_fade,
                  l_screen_width, l_screen_height,
                  l_bottom_offset):
 
         # ==================== Powerup Constructor ==========================================================
-        # ==================== Needs a player instance for collision detection =====================================
+        # ==================== Needs a player instance for collision detection ==============================
 
         self.__power_ups = []
         self.__screen_width = l_screen_width
@@ -34,6 +34,8 @@ class PowerupSpawner:
         self.__temp_vel = 0
         self.__temp_color_in = l_life_in
         self.__temp_color_out = l_life_out
+        self.__temp_color_fade = l_life_fade
+        self.__temp_stroke_width = l_screen_width//400
         self.__temp_type_index = 0
 
         self.__player = l_player
@@ -63,7 +65,7 @@ class PowerupSpawner:
         while self.__player.get_is_alive():
 
             self.__temp_vel = randint(self.__screen_width // 20, self.__screen_width//10)
-            self.__temp_size = self.__player.get_size()
+            self.__temp_size = self.__player.get_size() - 4
             self.__temp_pos_x = randint(0, self.__screen_width - self.__temp_size)
             self.__temp_type_index = randint(0, len(PowerOneUp.TYPES) - 1)
 
@@ -76,7 +78,8 @@ class PowerupSpawner:
             self.__power_ups.append(PowerOneUp(self.__temp_pos_x, self.__temp_pos_y,
                                                self.__temp_vel,
                                                self.__temp_size,
-                                               self.__temp_color_in, self.__temp_color_out,
+                                               self.__temp_color_in, self.__temp_color_out, self.__temp_color_fade,
+                                               self.__temp_stroke_width,
                                                self.__temp_type_index))
             sleep(self.__sleep_time)
 
@@ -119,3 +122,4 @@ class PowerupSpawner:
         elif l_powerup.get_type() == PowerOneUp.DIR_UP:
             if l_powerup.get_pos_y() <= self.__bottom_offset:
                 l_powerup.set_has_collided(True)
+
