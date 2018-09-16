@@ -1,6 +1,7 @@
 import pygame
 import math
 import time
+import threading
 from enemy_spawner import EnemySpawner
 from powerup_spawner import PowerupSpawner
 from player import Player
@@ -12,23 +13,23 @@ class Game:
 
     # red
 
-    CLR_BG = CLR_FDE = (170, 57, 57)
-    CLR_UI_BG = CLR_PLR_STN_OUT = CLR_PLR_STN_IN = CLR_ENM = (101, 9, 9)
-    CLR_UI_TXT_LIF = CLR_UI_TXT_SCR = (239, 137, 137)
-    CLR_POW_LIF_OUT = (255, 255, 255)
-    CLR_POW_LIF_IN = (204, 93, 93)
-    CLR_PLR_REG_OUT = (239, 137, 137)
-    CLR_PLR_REG_IN = (239, 137, 137)
+    # CLR_BG = CLR_FDE = (170, 57, 57)
+    # CLR_UI_BG = CLR_PLR_STN_OUT = CLR_PLR_STN_IN = CLR_ENM = (101, 9, 9)
+    # CLR_UI_TXT_LIF = CLR_UI_TXT_SCR = (239, 137, 137)
+    # CLR_POW_LIF_OUT = (255, 255, 255)
+    # CLR_POW_LIF_IN = (204, 93, 93)
+    # CLR_PLR_REG_OUT = (239, 137, 137)
+    # CLR_PLR_REG_IN = (239, 137, 137)
 
     # blue
 
-    # CLR_BG = CLR_FDE = (42, 78, 110)
-    # CLR_UI_BG = CLR_PLR_STN_OUT = CLR_PLR_STN_IN = CLR_ENM = (4, 31, 55)
-    # CLR_UI_TXT_LIF = CLR_UI_TXT_SCR = (114, 141, 165)
-    # CLR_POW_LIF_OUT = (255, 255, 255)
-    # CLR_POW_LIF_IN = (114, 141, 165)
-    # CLR_PLR_REG_OUT = (114, 141, 165)
-    # CLR_PLR_REG_IN = (114, 141, 165)
+    CLR_BG = CLR_FDE = (42, 78, 110)
+    CLR_UI_BG = CLR_PLR_STN_OUT = CLR_PLR_STN_IN = CLR_ENM = (4, 31, 55)
+    CLR_UI_TXT_LIF = CLR_UI_TXT_SCR = (114, 141, 165)
+    CLR_POW_LIF_OUT = (255, 255, 255)
+    CLR_POW_LIF_IN = (114, 141, 165)
+    CLR_PLR_REG_OUT = (114, 141, 165)
+    CLR_PLR_REG_IN = (114, 141, 165)
 
     def __init__(self, l_screen_width, l_screen_height, l_screen_title, l_frame_rate):
         self.__screen_width = l_screen_width
@@ -76,10 +77,10 @@ class Game:
         for sound in self.__player_direction_change_sounds:
             sound.set_volume(0.5)
 
-        self.__asshole_spawner = EnemySpawner(self.__player,
-                                              self.CLR_ENM, self.CLR_FDE,
-                                              self.__screen_width, self.__screen_height,
-                                              self.__font_screen_offset)
+        self.__enemy_spawner = EnemySpawner(self.__player,
+                                            self.CLR_ENM, self.CLR_FDE,
+                                            self.__screen_width, self.__screen_height,
+                                            self.__font_screen_offset)
 
         self.__powerup_spawner = PowerupSpawner(self.__player,
                                                 self.CLR_POW_LIF_IN, self.CLR_POW_LIF_OUT, self.CLR_FDE,
@@ -122,14 +123,16 @@ class Game:
 
     def logic(self):
 
-        self.__asshole_spawner.move(self.__time_per_frame_in_seconds)
+        self.__enemy_spawner.move(self.__time_per_frame_in_seconds)
         self.__powerup_spawner.move(self.__time_per_frame_in_seconds)
 
         self.__player_code = self.__player.move(self.__time_per_frame_in_seconds)
 
         if self.__player_code == Player.ERR_CODE_DEATH:
             print("Score: " + self.get_score())
-            self.__game_running = False
+            # self.__game_running = False
+            print(threading.active_count())
+            self.reset()
         elif self.__player_code == Player.INFO_CODE_HIT_ONCE:
             self.__time_without_hit = time.time() - self.__time_without_hit
             print("Time Survived: " + str(round(self.__time_without_hit)) + " seconds")
@@ -147,7 +150,7 @@ class Game:
         self.__screen.fill(Game.CLR_BG)
 
     def draw_entities(self):
-        self.__asshole_spawner.draw(self.__screen)
+        self.__enemy_spawner.draw(self.__screen)
         self.__powerup_spawner.draw(self.__screen)
         self.__player.draw(self.__screen)
 
@@ -184,9 +187,24 @@ class Game:
             self.__score_frame_increment += 0.02
 
         elif self.__score > self.__check_score_multiplier * self.__check_score_min_bound:
-            self.__asshole_spawner.increase_difficulty()
+            self.__enemy_spawner.increase_difficulty()
             self.__powerup_spawner.increase_difficulty()
             self.__check_score_min_bound *= self.__check_score_multiplier
+
+    def reset(self):
+
+        self.__powerup_spawner.stop()
+        self.__enemy_spawner.stop()
+
+        self.__score = 0
+        self.__score_frame_increment = 1
+        self.__player_direction_change_sounds_last_index = -1
+        self.__time_without_hit = time.time()
+        self.__check_score_min_bound = 2
+
+        self.__player.reset()
+        self.__enemy_spawner.reset()
+        self.__powerup_spawner.reset()
 
     def play_player_direction_change_sound(self, l_index):
         if self.__player_direction_change_sounds_last_index == -1:

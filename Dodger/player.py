@@ -59,13 +59,13 @@ class Player:
         self.__screen_width = l_screen_width
         self.__screen_height = l_screen_height
         self.__bottom_offset = l_bottom_offset
+        self.__original_pos_x = l_pos_x
+        self.__original_pos_y = l_pos_y
         self.__pos_x = l_pos_x
         self.__pos_y = l_pos_y
         self.__vel_x = 0
         self.__vel_y = 0
         self.__acc = self.__reg_acc
-
-        self.__is_alive = True
 
         self.__inner_color = self.__REG_COLOR_IN
         self.__outer_color = self.__REG_COLOR_OUT
@@ -89,6 +89,8 @@ class Player:
         self.__one_up_count = 0
 
         self.__has_been_hit_once = False
+        self.__is_stunned = False
+        self.__is_alive = True
 
     def move_left(self):
         if self.__dx != 1:
@@ -232,6 +234,8 @@ class Player:
 
         # ==================== When Player is Stunned start a stun timer ============================================
 
+        self.__is_stunned = True
+
         self.__acc = self.__stun_acc
         self.__inner_color = self.__STUN_COLOR_IN
         self.__outer_color = self.__STUN_COLOR_OUT
@@ -250,6 +254,8 @@ class Player:
     def un_stun(self):
 
         # ==================== Called when stun timer ends ===========================================================
+        self.__is_stunned = False
+
         self.__acc = self.__reg_acc
         self.__inner_color = self.__REG_COLOR_IN
         self.__outer_color = self.__REG_COLOR_OUT
@@ -262,6 +268,30 @@ class Player:
 
         if self.__stun_timer:
             self.__stun_timer.cancel()
+
+    def reset(self):
+
+        if self.__is_stunned:
+            self.un_stun()
+
+        self.__is_alive = True
+        self.__lives = 3
+        self.__current_dir = None
+
+        self.__keys = None
+        self.__dx, self.__dy = 0, 0
+
+        self.__stun_timer = None
+        self.__time_stunned = 0
+        self.__time_stunned_remaining = 0
+
+        self.__one_up_count = 0
+        self.__has_been_hit_once = False
+
+        self.__pos_x = self.__original_pos_x
+        self.__pos_y = self.__original_pos_y
+        self.__vel_x = 0
+        self.__vel_y = 0
 
         # ==================== All Sounds =================================================================
 

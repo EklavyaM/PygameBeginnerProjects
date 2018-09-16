@@ -12,7 +12,7 @@ class EnemySpawner:
     # ==================== The THRESHOLD_DIFFICULTY value is the minimum sleep time required =====================
     # ==================== by the Spawning thread. Any less than 0.07 makes the game far too difficult =============
 
-    DIFFICULTY_VALUE = 0.035
+    DIFFICULTY_VALUE = 0.025
     THRESHOLD_DIFFICULTY = 0.1
 
     INITIAL_WAIT = 3
@@ -43,6 +43,7 @@ class EnemySpawner:
         self.__temp_type_index = 0
 
         self.__player = l_player
+        self.__to_spawn_or_not_to_spawn = True
 
         # ==================== Starting Spawning Thread ============================================================
 
@@ -65,7 +66,7 @@ class EnemySpawner:
         # ==================== After Spawning takes a break for few seconds ========================================
         # ==================== Change values for different enemy behavior and visuals ============================
 
-        while self.__player.get_is_alive():
+        while self.__to_spawn_or_not_to_spawn:
 
             self.__temp_vel = randint(self.__screen_width // 160, self.__screen_width//3)
             self.__temp_size = randint(self.__screen_width//200, self.__screen_width//100)
@@ -91,6 +92,7 @@ class EnemySpawner:
 
         if self.__sleep_time - EnemySpawner.DIFFICULTY_VALUE >= EnemySpawner.THRESHOLD_DIFFICULTY:
             self.__sleep_time -= EnemySpawner.DIFFICULTY_VALUE
+            print(self.__sleep_time)
 
     def move(self, dt):
 
@@ -124,3 +126,26 @@ class EnemySpawner:
         elif l_enemy.get_type() == EnemyStraightPath.DIR_UP:
             if l_enemy.get_pos_y() <= self.__bottom_offset:
                 l_enemy.set_has_collided(True)
+
+    def stop(self):
+        self.__to_spawn_or_not_to_spawn = False
+        self.__thread_spawn.join()
+
+    def reset(self):
+
+        self.__to_spawn_or_not_to_spawn = True
+        del self.__enemies[:]
+
+        self.__thread_spawn = Timer(EnemySpawner.INITIAL_WAIT, self.__spawn)
+        self.__thread_spawn.setDaemon(True)
+        self.__sleep_time = 0.8
+
+        self.__temp_pos_x = 0
+        self.__temp_pos_y = 0
+        self.__temp_vel = 0
+        self.__temp_size = 0
+        self.__temp_type_index = 0
+
+        # ==================== Starting Spawning Thread ============================================================
+
+        self.__thread_spawn.start()

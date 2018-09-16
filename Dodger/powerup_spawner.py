@@ -40,6 +40,8 @@ class PowerupSpawner:
 
         self.__player = l_player
 
+        self.__to_spawn_or_not_to_spawn = True
+
         # ==================== Starting Spawning Thread ============================================================
 
         self.__thread_spawn.start()
@@ -62,10 +64,10 @@ class PowerupSpawner:
 
         # ==================== Change values for different enemy behavior and visuals ============================
 
-        while self.__player.get_is_alive():
+        while self.__to_spawn_or_not_to_spawn:
 
             self.__temp_vel = randint(self.__screen_width // 20, self.__screen_width//10)
-            self.__temp_size = self.__player.get_size() - 4
+            self.__temp_size = self.__player.get_size() - 2
             self.__temp_pos_x = randint(0, self.__screen_width - self.__temp_size)
             self.__temp_type_index = randint(0, len(PowerOneUp.TYPES) - 1)
 
@@ -123,3 +125,26 @@ class PowerupSpawner:
             if l_powerup.get_pos_y() <= self.__bottom_offset:
                 l_powerup.set_has_collided(True)
 
+    def stop(self):
+        self.__to_spawn_or_not_to_spawn = False
+        self.__thread_spawn.join()
+
+    def reset(self):
+
+        self.__to_spawn_or_not_to_spawn = True
+
+        del self.__power_ups[:]
+
+        self.__thread_spawn = Timer(PowerupSpawner.INITIAL_WAIT, self.__spawn)
+        self.__thread_spawn.setDaemon(True)
+        self.__sleep_time = 10
+
+        self.__temp_pos_x = 0
+        self.__temp_pos_y = 0
+        self.__temp_vel = 0
+        self.__temp_size = 0
+        self.__temp_type_index = 0
+
+        # ==================== Starting Spawning Thread ============================================================
+
+        self.__thread_spawn.start()
