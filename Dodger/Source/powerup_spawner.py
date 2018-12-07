@@ -51,6 +51,8 @@ class PowerupSpawner:
 
         # ==================== Checks for collision between player and enemy instance =============================
 
+        if not l_player.get_is_alive():
+            return
         if l_powerup.check_player_collision(l_player):
             if not l_powerup.get_has_collided():
                 l_powerup.set_has_collided(True)

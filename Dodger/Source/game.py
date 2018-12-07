@@ -1,7 +1,6 @@
 import pygame
 import math
 import time
-import threading
 from enemy_spawner import EnemySpawner
 from powerup_spawner import PowerupSpawner
 from player import Player
@@ -37,9 +36,8 @@ class Game:
     CLR_POW_LIF_OUT = (223, 151, 117)
     CLR_POW_LIF_IN = CLR_PLR_REG_OUT = CLR_PLR_REG_IN = (201, 111, 66)
 
-    def __init__(self, l_screen_width, l_screen_height, l_screen_title, l_frame_rate):
-        self.__screen_width = l_screen_width
-        self.__screen_height = l_screen_height
+    def __init__(self, l_screen_title, l_frame_rate):
+
         self.__screen_title = l_screen_title
 
         self.__frame_rate = l_frame_rate
@@ -47,16 +45,16 @@ class Game:
         self.__time_per_frame_in_milli_seconds = self.__time_per_frame_in_seconds * 1000
 
         self.__game_running = True
+        self.__playing = True
 
         self.__score = 0
         self.__score_frame_increment = 1
 
-        self.__font_size = l_screen_height//38
-        self.__font_style = "cousine"
-        self.__font_screen_offset = self.__screen_height//28
-
         self.__score_text = None
         self.__lives_text = None
+        self.__win_message = None
+        self.__win_restart_message = None
+        self.__win_exit_message = None
 
         self.__soundtrack = "Eye of the Storm.mp3"
 
@@ -67,9 +65,22 @@ class Game:
 
         pygame.init()
 
-        self.__font = pygame.font.SysFont(self.__font_style, self.__font_size)
+        self.__info_object = pygame.display.Info()
 
-        self.__screen = pygame.display.set_mode((self.__screen_width, self.__screen_height))
+        self.__screen_width = self.__info_object.current_w
+        self.__screen_height = self.__info_object.current_h
+
+        self.__font_size = self.__screen_height // 38
+        self.__large_font_size = self.__screen_height // 38
+        self.__small_font_size = self.__screen_height // 52
+        self.__font_style = "cousine"
+        self.__font_screen_offset = self.__screen_height//28
+
+        self.__font = pygame.font.SysFont(self.__font_style, self.__font_size)
+        self.__large_font = pygame.font.SysFont(self.__font_style, self.__large_font_size)
+        self.__small_font = pygame.font.SysFont(self.__font_style, self.__small_font_size)
+
+        self.__screen = pygame.display.set_mode((self.__screen_width, self.__screen_height), pygame.FULLSCREEN)
         pygame.display.set_caption(self.__screen_title)
         pygame.mouse.set_visible(False)
 
@@ -114,14 +125,19 @@ class Game:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         self.__game_running = False
-                    if event.key == pygame.K_LEFT and self.__player.move_left():
-                        self.play_player_direction_change_sound(0)
-                    elif event.key == pygame.K_RIGHT and self.__player.move_right():
-                        self.play_player_direction_change_sound(0)
-                    if event.key == pygame.K_UP and self.__player.move_up():
-                        self.play_player_direction_change_sound(1)
-                    elif event.key == pygame.K_DOWN and self.__player.move_down():
-                        self.play_player_direction_change_sound(1)
+
+                    if self.__playing:
+                        if event.key == pygame.K_LEFT and self.__player.move_left():
+                            self.play_player_direction_change_sound(0)
+                        elif event.key == pygame.K_RIGHT and self.__player.move_right():
+                            self.play_player_direction_change_sound(0)
+                        if event.key == pygame.K_UP and self.__player.move_up():
+                            self.play_player_direction_change_sound(1)
+                        elif event.key == pygame.K_DOWN and self.__player.move_down():
+                            self.play_player_direction_change_sound(1)
+
+                    elif event.key == pygame.K_RETURN:
+                        self.reset()
 
             self.logic()
             self.draw()
@@ -140,13 +156,11 @@ class Game:
         self.__player_code = self.__player.move(self.__time_per_frame_in_seconds)
 
         if self.__player_code == Player.ERR_CODE_DEATH:
-            print("Score: " + self.get_score())
-            # self.__game_running = False
-            print(threading.active_count())
-            self.reset()
+            # print("Score: " + self.get_score())
+            self.stop()
         elif self.__player_code == Player.INFO_CODE_HIT_ONCE:
             self.__time_without_hit = time.time() - self.__time_without_hit
-            print("Time Survived: " + str(round(self.__time_without_hit)) + " seconds")
+            # print("Time Survived: " + str(round(self.__time_without_hit)) + " seconds")
             self.__time_without_hit = time.time()
 
     def draw(self):
@@ -169,6 +183,22 @@ class Game:
         pygame.draw.rect(self.__screen, Game.CLR_UI_BG,
                          (0, 0, self.__screen_width, self.__font_screen_offset))
         self.__score_text = self.__font.render(self.get_score(), True, Game.CLR_UI_TXT_SCR)
+
+        if not self.__playing:
+            self.__win_message = self.__large_font.render("GAME OVER!", True, Game.CLR_UI_BG)
+            self.__win_restart_message = self.__small_font.render("Press Enter to restart...", True, Game.CLR_UI_BG)
+            self.__win_exit_message = self.__small_font.render("or Escape to exit", True, Game.CLR_UI_BG)
+            self.__screen.blit(self.__win_message,
+                               ((self.__screen_width - self.__win_message.get_rect().width) // 2,
+                                (self.__screen_height - self.__win_message.get_rect().height) // 2
+                                - self.__font_screen_offset))
+            self.__screen.blit(self.__win_restart_message,
+                               ((self.__screen_width - self.__win_restart_message.get_rect().width) // 2,
+                                (self.__screen_height - self.__win_restart_message.get_rect().height) // 2))
+            self.__screen.blit(self.__win_exit_message,
+                               ((self.__screen_width - self.__win_exit_message.get_rect().width) // 2,
+                                (self.__screen_height - self.__win_exit_message.get_rect().height) // 2
+                                + 0.7 * self.__font_screen_offset))
 
         self.__screen.blit(self.__score_text,
                            (self.__screen_width // 2 - self.__score_text.get_rect().width // 2,
@@ -195,6 +225,9 @@ class Game:
         # ====================  Thereby creating a dynamic range of levels of difficulty which is =====================
         # ====================  [g_check_score_min_bound, 1.5 * g_check_score_min_bound] ==============================
 
+        if not self.__playing:
+            return
+
         if self.__check_score_min_bound < self.__score < self.__check_score_multiplier * self.__check_score_min_bound:
             self.__score_frame_increment += 0.02
 
@@ -203,7 +236,15 @@ class Game:
             self.__powerup_spawner.increase_difficulty()
             self.__check_score_min_bound *= self.__check_score_multiplier
 
+    def stop(self):
+        self.__playing = False
+        self.__score_frame_increment = 0
+        self.__player_direction_change_sounds_last_index = -1
+        self.__time_without_hit = time.time()
+        self.__check_score_min_bound = 2
+
     def reset(self):
+        self.__playing = True
         self.__powerup_spawner.stop()
         self.__enemy_spawner.stop()
 

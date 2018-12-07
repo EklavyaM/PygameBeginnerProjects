@@ -200,6 +200,9 @@ class Player:
     def draw(self, scr):
 
         # ==================== Drawing the Player =================================================================
+        if not self.__is_alive:
+            return
+
         pygame.draw.rect(scr, self.__outer_color, self.__hit_box)
         pygame.draw.rect(scr, self.__inner_color, self.__inner_box)
 

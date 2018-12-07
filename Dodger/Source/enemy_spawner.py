@@ -54,6 +54,8 @@ class EnemySpawner:
 
         # ==================== Checks for collision between player and enemy instance =============================
 
+        if not l_player.get_is_alive():
+            return
         if l_enemy.check_player_collision(l_player):
             if not l_enemy.get_has_collided():
                 l_enemy.set_has_collided(True)
