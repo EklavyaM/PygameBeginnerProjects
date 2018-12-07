@@ -13,7 +13,7 @@ class EnemySpawner:
     # ==================== by the Spawning thread. Any less than 0.07 makes the game far too difficult =============
 
     DIFFICULTY_VALUE = 0.025
-    THRESHOLD_DIFFICULTY = 0.1
+    THRESHOLD_DIFFICULTY = 0.07
 
     INITIAL_WAIT = 3
 

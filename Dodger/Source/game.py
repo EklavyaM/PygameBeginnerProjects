@@ -57,7 +57,7 @@ class Game:
         self.__win_exit_message = None
         self.__dev_message = None
 
-        self.__soundtrack = "Eye of the Storm.mp3"
+        self.__soundtrack = "Eye of the Storm.ogg"
 
         # ====================  A Min Score for Dynamic Difficulty Increase ============================================
 
@@ -73,11 +73,11 @@ class Game:
 
         self.__font_size = self.__screen_height // 38
         self.__small_font_size = self.__screen_height // 52
-        self.__font_style = "cousine"
+        self.__font_name = "Amiko-Regular.ttf"
         self.__font_screen_offset = self.__screen_height//28
 
-        self.__font = pygame.font.SysFont(self.__font_style, self.__font_size)
-        self.__small_font = pygame.font.SysFont(self.__font_style, self.__small_font_size)
+        self.__font = pygame.font.Font(self.__font_name, self.__font_size)
+        self.__small_font = pygame.font.Font(self.__font_name, self.__small_font_size)
 
         self.__screen = pygame.display.set_mode((self.__screen_width, self.__screen_height), pygame.FULLSCREEN)
         pygame.display.set_caption(self.__screen_title)
@@ -145,7 +145,6 @@ class Game:
             pygame.time.delay(math.trunc(self.__time_per_frame_in_milli_seconds))
 
         pygame.quit()
-        quit()
 
     def logic(self):
 
@@ -188,6 +187,7 @@ class Game:
             self.__win_message = self.__font.render("GAME OVER!", True, Game.CLR_UI_BG)
             self.__win_restart_message = self.__small_font.render("Press Enter to restart...", True, Game.CLR_UI_BG)
             self.__win_exit_message = self.__small_font.render("or Escape to exit", True, Game.CLR_UI_BG)
+
             self.__screen.blit(self.__win_message,
                                ((self.__screen_width - self.__win_message.get_rect().width) // 2,
                                 (self.__screen_height - self.__win_message.get_rect().height) // 2
@@ -205,8 +205,8 @@ class Game:
                             (self.__font_screen_offset - self.__font_size)//2))
 
         self.__screen.blit(self.__dev_message,
-                           (self.__screen_width - self.__dev_message.get_rect().width,
-                            self.__screen_height - self.__font_size))
+                           (self.__screen_width - 1.05 * self.__dev_message.get_rect().width,
+                            self.__screen_height - self.__dev_message.get_rect().height))
 
         for i in range(self.__player.get_lives()):
             pygame.draw.rect(self.__screen, Game.CLR_PLR_REG_IN,
