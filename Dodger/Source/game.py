@@ -23,13 +23,19 @@ class Game:
 
     # blue
 
-    CLR_BG = CLR_FDE = (42, 78, 110)
-    CLR_UI_BG = CLR_PLR_STN_OUT = CLR_PLR_STN_IN = CLR_ENM = (4, 31, 55)
-    CLR_UI_TXT_LIF = CLR_UI_TXT_SCR = (114, 141, 165)
-    CLR_POW_LIF_OUT = (255, 255, 255)
-    CLR_POW_LIF_IN = (114, 141, 165)
-    CLR_PLR_REG_OUT = (114, 141, 165)
-    CLR_PLR_REG_IN = (114, 141, 165)
+    # CLR_BG = CLR_FDE = (42, 78, 110)
+    # CLR_UI_BG = CLR_PLR_STN_OUT = CLR_PLR_STN_IN = CLR_ENM = (4, 31, 55)
+    # CLR_UI_TXT_LIF = CLR_UI_TXT_SCR = (114, 141, 165)
+    # CLR_POW_LIF_OUT = (255, 255, 255)
+    # CLR_POW_LIF_IN = CLR_PLR_REG_OUT = CLR_PLR_REG_IN = (114, 141, 165)
+
+    # brown
+
+    CLR_BG = CLR_FDE = (90, 63, 49)
+    CLR_UI_BG = CLR_PLR_STN_OUT = CLR_PLR_STN_IN = CLR_ENM = (50, 37, 30)
+    CLR_UI_TXT_LIF = CLR_UI_TXT_SCR = (142, 91, 66)
+    CLR_POW_LIF_OUT = (223, 151, 117)
+    CLR_POW_LIF_IN = CLR_PLR_REG_OUT = CLR_PLR_REG_IN = (201, 111, 66)
 
     def __init__(self, l_screen_width, l_screen_height, l_screen_title, l_frame_rate):
         self.__screen_width = l_screen_width
@@ -45,9 +51,9 @@ class Game:
         self.__score = 0
         self.__score_frame_increment = 1
 
-        self.__font_size = l_screen_height//40
+        self.__font_size = l_screen_height//38
         self.__font_style = "cousine"
-        self.__font_screen_offset = self.__font_size + 2
+        self.__font_screen_offset = self.__screen_height//28
 
         self.__score_text = None
         self.__lives_text = None
@@ -57,7 +63,7 @@ class Game:
         # ====================  A Min Score for Dynamic Difficulty Increase ============================================
 
         self.__check_score_min_bound = 2
-        self.__check_score_multiplier = 1.5
+        self.__check_score_multiplier = 1.4
 
         pygame.init()
 
@@ -65,6 +71,9 @@ class Game:
 
         self.__screen = pygame.display.set_mode((self.__screen_width, self.__screen_height))
         pygame.display.set_caption(self.__screen_title)
+        pygame.mouse.set_visible(False)
+
+        # ====================  INIT ===================================================================================
 
         self.__player = Player(self.__screen_width // 2, self.__screen_height // 2,
                                Game.CLR_PLR_REG_IN, Game.CLR_PLR_REG_OUT, Game.CLR_PLR_STN_IN, Game.CLR_PLR_STN_OUT,
@@ -93,7 +102,7 @@ class Game:
         pygame.mixer.music.load(self.__soundtrack)
         pygame.mixer.music.play(-1)
 
-    def run(self):
+    def play(self):
 
         while self.__game_running:
 
@@ -103,6 +112,8 @@ class Game:
                     self.__game_running = False
 
                 if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        self.__game_running = False
                     if event.key == pygame.K_LEFT and self.__player.move_left():
                         self.play_player_direction_change_sound(0)
                     elif event.key == pygame.K_RIGHT and self.__player.move_right():
@@ -160,7 +171,8 @@ class Game:
         self.__score_text = self.__font.render(self.get_score(), True, Game.CLR_UI_TXT_SCR)
 
         self.__screen.blit(self.__score_text,
-                           (self.__screen_width // 2 - self.__score_text.get_rect().width // 2, 0))
+                           (self.__screen_width // 2 - self.__score_text.get_rect().width // 2,
+                            (self.__font_screen_offset - self.__font_size)//2))
 
         for i in range(self.__player.get_lives()):
             pygame.draw.rect(self.__screen, Game.CLR_PLR_REG_IN,
@@ -192,7 +204,6 @@ class Game:
             self.__check_score_min_bound *= self.__check_score_multiplier
 
     def reset(self):
-
         self.__powerup_spawner.stop()
         self.__enemy_spawner.stop()
 

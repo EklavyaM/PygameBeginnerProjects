@@ -92,7 +92,6 @@ class EnemySpawner:
 
         if self.__sleep_time - EnemySpawner.DIFFICULTY_VALUE >= EnemySpawner.THRESHOLD_DIFFICULTY:
             self.__sleep_time -= EnemySpawner.DIFFICULTY_VALUE
-            print(self.__sleep_time)
 
     def move(self, dt):
 
